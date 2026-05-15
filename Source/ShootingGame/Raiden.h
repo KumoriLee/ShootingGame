@@ -38,6 +38,7 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	//入力対応
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputMappingContext* DefaultMappingContext;
 
@@ -45,16 +46,13 @@ public:
 	UInputAction* MoveAction;
 
 	UPROPERTY(EditAnywhere, Category = "Input")
-	UInputAction* TurnAction;
-
-	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* FireAction;
 
-
+	//デフォルト値
 	UPROPERTY(EditAnywhere)
 	float Speed = 300.0f;
 
-
+	//メソッド
 	void MoveInput(const FInputActionValue& Value);
 	void FireInput();
 	

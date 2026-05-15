@@ -20,13 +20,15 @@ void ARaiden::BeginPlay()
 	Super::BeginPlay();
 
 
-	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))
+	//コントローラー初期化
+	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))//PlayerControllerを取得
 	{
-		if (ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer())
+		if (ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer())//LocalPlayerを取得
 		{
 			if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
 				ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer))
 			{
+				//このマッピングコンテキストで定義されたすべての入力アクションをエンジンが認識し、処理できるように
 				Subsystem->AddMappingContext(DefaultMappingContext, 0);
 			}
 		}
@@ -40,7 +42,11 @@ void ARaiden::Tick(float DeltaTime)
 	if (CapsuleComp)//存在する場合
 	{
 		FVector CapsuleLocation = CapsuleComp->GetComponentLocation();//座標のベクトルを獲得
+		float	CapsuleRadius = CapsuleComp->GetScaledCapsuleRadius();//半径
+		float	CapsuleHalfHeight = CapsuleComp->GetScaledCapsuleHalfHeight();//直径
 
+		//デバッグ用のcapsuleを描画する
+		DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, FQuat::Identity, FColor::Green, false, -1.0f, 0, 2.0f);
 	}
 	
 		
