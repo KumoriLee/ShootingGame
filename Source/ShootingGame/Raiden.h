@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "BasePawn.h"
 
+#include "GameFrameWork/SpringArmComponent.h"
 #include "EnhancedInputSubsystems.h"
 
 #include "InputAction.h"
@@ -15,6 +16,8 @@
 #include "Raiden.generated.h"
 //入力対応
 class UInputMappingContext;
+//カメラ対応
+class UCameraComponent;
 
 
 /**
@@ -47,6 +50,14 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* FireAction;
+
+	//カメラコンポーネント
+	UPROPERTY(VisibleAnywhere)
+	USpringArmComponent* SpringArmComp;
+
+	UPROPERTY(VisibleAnywhere)
+	UCameraComponent* CameraComp;
+
 
 	//デフォルト値
 	UPROPERTY(EditAnywhere)
