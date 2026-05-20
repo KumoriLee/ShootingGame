@@ -4,6 +4,9 @@
 #include "Raiden.h"
 
 #include "InputMappingContext.h"
+//カメラのヘーダファイル
+#include "Camera/CameraComponent.h"
+
 
 //UGameplayStatics
 #include "Kismet/GameplayStatics.h"
@@ -13,6 +16,11 @@
 
 ARaiden::ARaiden()
 {
+	SpringArmComp = CreateDefaultSubobject <USpringArmComponent>(TEXT("SpringArmComp"));
+	SpringArmComp->SetupAttachment(CapsuleComp);
+
+	CameraComp = CreateDefaultSubobject <UCameraComponent>(TEXT("CameraComp"));
+	CameraComp->SetupAttachment(SpringArmComp);
 }
 
 void ARaiden::BeginPlay()
