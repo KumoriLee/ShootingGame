@@ -21,6 +21,7 @@ ARaiden::ARaiden()
 
 	CameraComp = CreateDefaultSubobject <UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(SpringArmComp);
+
 }
 
 void ARaiden::BeginPlay()
@@ -42,6 +43,11 @@ void ARaiden::BeginPlay()
 		}
 	}
 }
+//離れた時ゼロにする
+void ARaiden::StopMoveInput(const FInputActionValue& Value)
+{
+	TargetRoll = 0.0f;
+}
 
 void ARaiden::Tick(float DeltaTime)
 {
@@ -56,8 +62,20 @@ void ARaiden::Tick(float DeltaTime)
 		//デバッグ用のcapsuleを描画する
 		DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, FQuat::Identity, FColor::Green, false, -1.0f, 0, 2.0f);
 	}
-	
+	//傾斜処理
+	if (BaseMesh)
+	{
 		
+		FRotator CurrentMeshRotation = BaseMesh->GetRelativeRotation();
+
+		//数値を滑らかに補正
+		float NewRoll = FMath::FInterpTo(CurrentMeshRotation.Roll, TargetRoll, DeltaTime, RollInterpSpeed);
+
+		// 機体の回転を更新（Roll のみ変更）
+		BaseMesh->SetRelativeRotation(FRotator(CurrentMeshRotation.Pitch, CurrentMeshRotation.Yaw, NewRoll));
+	}
+	
+	
 }
 
 void ARaiden::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -67,25 +85,36 @@ void ARaiden::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	if (UEnhancedInputComponent* EIC = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		EIC->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ARaiden::MoveInput);
+		//キー解放または中断時にリターン（戻る）処理を実行
+		EIC->BindAction(MoveAction, ETriggerEvent::Completed, this, &ARaiden::StopMoveInput);
+		EIC->BindAction(MoveAction, ETriggerEvent::Canceled, this, &ARaiden::StopMoveInput);
 
-
-		EIC->BindAction(FireAction, ETriggerEvent::Started, this, &ARaiden::FireInput);
+		EIC->BindAction(FireAction, ETriggerEvent::Triggered, this, &ARaiden::FireInput);
 	}
 }
 
 void ARaiden::MoveInput(const FInputActionValue& Value)
 {
-	float InputValue = Value.Get<float>();
+	//入力システムから Vector2D の値を取得
+	FVector2D MovementVector = Value.Get<FVector2D>();
+	float DeltaTime = UGameplayStatics::GetWorldDeltaSeconds(GetWorld());
 
-	FVector DeltaLocation = FVector(0.0f, 0.0f, 0.0f);
-	DeltaLocation.X = Speed * InputValue * UGameplayStatics::GetWorldDeltaSeconds(GetWorld());
-	AddActorLocalOffset(DeltaLocation, true);
-	DeltaLocation.Y = Speed * InputValue * UGameplayStatics::GetWorldDeltaSeconds(GetWorld());
-	AddActorLocalOffset(DeltaLocation, true);
+	// 入力がある場合のみ移動処理を行う
+	if (MovementVector.SizeSquared() > 0.0f)
+	{
+		// 入力値をゲーム内の移動方向（X軸・Y軸）にマッピング
+		FVector DeltaLocation = FVector::ZeroVector;
 
-	FRotator DeltaRotation = FRotator(0.0f, 0.0f, 0.0f);
+		DeltaLocation.X = MovementVector.Y * Speed * DeltaTime; // 前後の移動量
+		DeltaLocation.Y = MovementVector.X * Speed * DeltaTime; // 左右の移動量
 
+		// 移動量を一度にまとめて適用
+		// 第2引数を true にすることで、壁などの衝突判定を有効に
+		AddActorLocalOffset(DeltaLocation, true);
 
+		// 右入力(1.0)なら45度、左入力(-1.0)なら-45度に傾斜
+		TargetRoll = MovementVector.X * MaxRollAngle;
+	}
 }
 
 void ARaiden::FireInput()
