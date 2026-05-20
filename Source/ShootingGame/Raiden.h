@@ -36,6 +36,15 @@ protected:
 	//現在の目標傾斜角度
 	float TargetRoll = 0.0f;
 
+	//連射するためにtimerを作る
+
+	// 連続発射の間隔（秒）
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	float FireRate = 0.15f;
+
+	// クールダウン計算用
+	float LastFireTime = 0.0f;
+
 public:
 	ARaiden();
 

@@ -119,5 +119,17 @@ void ARaiden::MoveInput(const FInputActionValue& Value)
 
 void ARaiden::FireInput()
 {
+	//現在のゲーム内の絶対時間を取得（秒）
+	float CurrentTime = GetWorld()->GetTimeSeconds();
+
+	//現在の時間 - 前回撃った時間 が FireRate以上経過しているか判定
+	if (CurrentTime - LastFireTime >= FireRate)
+	{
+		fire();
+
+		//クールダウンをリセットする
+		LastFireTime = CurrentTime;
+	}
 }
+
 
