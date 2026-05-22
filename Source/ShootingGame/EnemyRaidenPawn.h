@@ -23,11 +23,21 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere)
-	float FireRange = 300.0f;
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	float FireRange = 1500.0f; 
+	UPROPERTY(EditAnywhere, Category = "Combat")
+	float FireRate = 0.5f; 
 
-	UPROPERTY(EditAnywhere)
-	float FireRate = 2.0f;
+	// 移动相关参数
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	float ForwardSpeed = 300.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	float YTargetSpeed = 200.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	float SearchRange = 2000.0f;
+
 
 	ARaiden* Raiden;
 
@@ -35,5 +45,10 @@ public:
 
 	void CheckFireCondition();
 	void HandleDestruction();
+
+private:
+	float FireCycleTimer = 0.0f;
+	bool bIsFiringPhase = true;
+	bool bIsOutOfBounds = false;
 
 };
