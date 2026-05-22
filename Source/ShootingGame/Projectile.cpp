@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Projectile.h"
@@ -22,7 +22,7 @@ AProjectile::AProjectile()
 void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
-	//�ǥꥱ�`��
+	//デリケート
 	ProjectileMesh->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
 
 }
