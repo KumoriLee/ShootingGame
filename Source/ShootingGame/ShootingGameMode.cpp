@@ -38,7 +38,7 @@ void AShootingGameMode::ActorDied(AActor* DeadActor)
 	}
 	else
 	{
-		//tower just died
+		//enemy just died
 		point++;
 	}
 }
