@@ -26,6 +26,23 @@ void AShootingGameMode::BeginPlay()
 
 }
 
+void AShootingGameMode::ActorDied(AActor* DeadActor)
+{
+	bool IsGameOver = false;
+
+	if (DeadActor == raiden)
+	{
+		//tank just died
+		raiden->HandleDestruction();
+		IsGameOver = true;
+	}
+	else
+	{
+		//tower just died
+		point++;
+	}
+}
+
 void AShootingGameMode::SpawnEnemy()
 {
 	if (EnemyClassToSpawn && raiden)

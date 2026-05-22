@@ -24,12 +24,15 @@ protected:
 public:
 	ARaiden* raiden;
 	int32 enemyCount;
+	int32 point = 0;
 
 	UPROPERTY(EditAnywhere, Category = "Spawning")
 	TSubclassOf<AEnemyRaidenPawn> EnemyClassToSpawn;
 
 	UPROPERTY(EditAnywhere, Category = "Spawning")
 	float SpawnInterval = 3.0f;
+
+	void ActorDied(AActor* DeadActor);
 
 private:
 	FTimerHandle SpawnTimerHandle;
