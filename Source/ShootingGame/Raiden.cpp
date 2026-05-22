@@ -28,9 +28,9 @@ void ARaiden::BeginPlay()
 {
 	Super::BeginPlay();
 
-
+	PlayerController = Cast<APlayerController>(Controller);
 	//コントローラー初期化
-	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))//PlayerControllerを取得
+	if (PlayerController)//PlayerControllerを取得
 	{
 		if (ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer())//LocalPlayerを取得
 		{
@@ -129,6 +129,31 @@ void ARaiden::FireInput()
 
 		//クールダウンをリセットする
 		LastFireTime = CurrentTime;
+	}
+}
+
+void ARaiden::HandleDestruction()
+{
+	Super::HandleDestruction();
+
+	IsAlive = false;
+	SetActorHiddenInGame(true);
+	SetActorTickEnabled(false);
+	SetPlayerEnabled(false);
+}
+
+void ARaiden::SetPlayerEnabled(bool Enabled)
+{
+	if (PlayerController)
+	{
+		if (Enabled)
+		{
+			EnableInput(PlayerController);
+		}
+		else
+		{
+			DisableInput(PlayerController);
+		}
 	}
 }
 

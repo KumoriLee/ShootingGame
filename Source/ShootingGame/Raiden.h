@@ -83,9 +83,17 @@ public:
 	float RollInterpSpeed = 5.0f;//傾斜のスムース遷移速度
 
 
+	APlayerController* PlayerController;
+
+	bool IsAlive = true;
+
 
 	//メソッド
 	void MoveInput(const FInputActionValue& Value);
 	void FireInput();
+
+	void HandleDestruction();
+	void SetPlayerEnabled(bool Enabled);
+
 	
 };
