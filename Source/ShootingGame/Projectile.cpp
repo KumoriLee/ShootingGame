@@ -25,6 +25,8 @@ void AProjectile::BeginPlay()
 	//デリケート
 	ProjectileMesh->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
 
+	// 生成時にプレイヤーを一度だけ取得し、毎フレームの取得を回避
+	CachedPlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
 }
 
 // Called every frame
@@ -32,6 +34,20 @@ void AProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// 画面の相対範囲から外れたか判定
+	if (CachedPlayerPawn && !bIsOutOfBounds)
+	{
+		float PlayerX = CachedPlayerPawn->GetActorLocation().X;
+		float CurrentX = GetActorLocation().X;
+
+		// 弾がプレイヤーより後方、範囲外と判定
+		if (CurrentX > PlayerX + 500.0f)
+		{
+			bIsOutOfBounds = true;
+			// エンジン内蔵関数を呼び出し、3秒後にこの弾を自動的に破棄
+			SetLifeSpan(3.0f);
+		}
+	}
 }
 
 void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
