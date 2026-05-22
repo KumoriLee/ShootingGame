@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+ï»¿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "ShootingGameMode.h"
@@ -9,8 +9,11 @@ void AShootingGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
+	raiden = Cast<ARaiden>(UGameplayStatics::GetPlayerPawn(this, 0));
 
-	//gamemode¤òÊ¹ÓÃ¤·¤Æ¥Ç¥Õ¥©¥ë¥È¥×¥ì¥¤¥ä©`¤òÔO¶¨¤¹¤ë
+	GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &AShootingGameMode::SpawnEnemy, SpawnInterval, true);
+
+	//gamemodeã‚’ä½¿ç”¨ã—ã¦ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‚’è¨­å®šã™ã‚‹
 	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	if (PlayerPawn)
 	{
@@ -21,4 +24,18 @@ void AShootingGameMode::BeginPlay()
 		}
 	}
 
+}
+
+void AShootingGameMode::SpawnEnemy()
+{
+	if (EnemyClassToSpawn && raiden)
+	{
+		FVector PlayerLoc = raiden->GetActorLocation();
+
+		FVector SpawnLocation(PlayerLoc.X - 4000.0f, PlayerLoc.Y + FMath::RandRange(-2000.0f, 2000.0f), PlayerLoc.Z);
+
+		FRotator SpawnRotation(0.0f, 0.0f, 0.0f);
+
+		GetWorld()->SpawnActor<AEnemyRaidenPawn>(EnemyClassToSpawn, SpawnLocation, SpawnRotation);
+	}
 }
