@@ -29,3 +29,7 @@ void ABasePawn::fire()
 	UE_LOG(LogTemp, Display, TEXT("fired"));
 	
 }
+
+void ABasePawn::HandleDestruction()
+{
+}

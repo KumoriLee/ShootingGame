@@ -31,4 +31,7 @@ public:
 
 
 	void fire();
+
+	void HandleDestruction();
+
 };
