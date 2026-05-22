@@ -39,7 +39,13 @@ void AShootingGameMode::ActorDied(AActor* DeadActor)
 	else
 	{
 		//enemy just died
-		point++;
+		AEnemyRaidenPawn* DeadEnemyRaiden = Cast<AEnemyRaidenPawn>(DeadActor);
+		if (DeadEnemyRaiden)
+		{
+			DeadEnemyRaiden->HandleDestruction();
+			point++;
+		}
+		
 	}
 }
 
