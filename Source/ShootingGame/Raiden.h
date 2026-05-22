@@ -6,7 +6,7 @@
 #include "BasePawn.h"
 
 #include "GameFrameWork/SpringArmComponent.h"
-#include "EnhancedInputSubsystems.h"
+#include "EnhancedInputSubsystems.h"//build.csにも加入
 
 #include "InputAction.h"
 #include "InputActionValue.h"
@@ -31,6 +31,19 @@ class SHOOTINGGAME_API ARaiden : public ABasePawn
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	//ボタンを離れた時の処理
+	void StopMoveInput(const FInputActionValue& Value);
+	//現在の目標傾斜角度
+	float TargetRoll = 0.0f;
+
+	//連射するためにtimerを作る
+
+	// 連続発射の間隔（秒）
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	float FireRate = 0.15f;
+
+	// クールダウン計算用
+	float LastFireTime = 0.0f;
 
 public:
 	ARaiden();
@@ -61,7 +74,15 @@ public:
 
 	//デフォルト値
 	UPROPERTY(EditAnywhere)
-	float Speed = 300.0f;
+	float Speed = 300.0f;//速度
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float MaxRollAngle = 45.0f;//傾斜角度
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float RollInterpSpeed = 5.0f;//傾斜のスムース遷移速度
+
+
 
 	//メソッド
 	void MoveInput(const FInputActionValue& Value);

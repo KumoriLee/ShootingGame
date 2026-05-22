@@ -15,8 +15,25 @@ ABasePawn::ABasePawn()
 
 	BaseMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BaseMesh"));
 	BaseMesh->SetupAttachment(CapsuleComp);
+	//生成点をbasemeshにつける
+	ProjectileSpawnPoint = CreateDefaultSubobject<USceneComponent>(TEXT("ProjectileSpawnPoint"));
+	ProjectileSpawnPoint->SetupAttachment(BaseMesh);
 }
 
 void ABasePawn::fire()
+{
+	//ProjectileSpawnPointの場所で弾を生成
+	FVector SpawnLocation = ProjectileSpawnPoint->GetComponentLocation();
+	FRotator SpawnRotation = ProjectileSpawnPoint->GetComponentRotation();
+
+	AProjectile* Projectile = GetWorld()->SpawnActor<AProjectile>(ProjectileClass, SpawnLocation, SpawnRotation);
+	if (Projectile)
+	{
+		Projectile->SetOwner(this);
+	}
+	
+}
+
+void ABasePawn::HandleDestruction()
 {
 }

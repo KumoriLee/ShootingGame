@@ -7,6 +7,9 @@
 
 #include "Components/CapsuleComponent.h"
 
+#include "Projectile.h"
+
+
 #include "BasePawn.generated.h"
 
 UCLASS()
@@ -25,5 +28,18 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* BaseMesh;
 
+	//弾の生成点
+	UPROPERTY(VisibleAnywhere)
+	USceneComponent* ProjectileSpawnPoint;
+
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AProjectile> ProjectileClass;
+
+
+
 	void fire();
+
+	void HandleDestruction();
+
 };
