@@ -60,7 +60,7 @@ void AEnemyRaidenPawn::Tick(float DeltaTime)
 			}
 			else
 			{
-				TargetRoll = 0.0f; // 追跡位置に到達、姿勢を戻す
+				TargetRoll = 0.0f; // 追跡位置に到達、角度戻す
 			}
 		}
 		else
@@ -70,14 +70,14 @@ void AEnemyRaidenPawn::Tick(float DeltaTime)
 	}
 	SetActorLocation(CurrentLocation);
 
-	// 発射サイクルのステートマシン (5秒発射、2秒停止)
+	// 発射サイクルのステートマシン
 	FireCycleTimer += DeltaTime;
-	if (bIsFiringPhase && FireCycleTimer >= 5.0f)
+	if (bIsFiringPhase && FireCycleTimer >= 5.0f)//発射つつける時間
 	{
 		bIsFiringPhase = false;
 		FireCycleTimer = 0.0f;
 	}
-	else if (!bIsFiringPhase && FireCycleTimer >= 2.0f)
+	else if (!bIsFiringPhase && FireCycleTimer >= 2.0f)//クールダウン時間
 	{
 		bIsFiringPhase = true;
 		FireCycleTimer = 0.0f;

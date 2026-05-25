@@ -28,7 +28,7 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Combat")
 	float FireRate = 0.5f; 
 
-	// 移动相关参数
+	//動きに関する変数
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float ForwardSpeed = 300.0f;
 
