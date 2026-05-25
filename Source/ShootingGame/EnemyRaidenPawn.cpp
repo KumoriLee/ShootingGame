@@ -3,6 +3,7 @@
 
 #include "EnemyRaidenPawn.h"
 #include "Kismet/GameplayStatics.h"
+#include "HealthComponent.h"
 
 void AEnemyRaidenPawn::BeginPlay()
 {
@@ -11,14 +12,27 @@ void AEnemyRaidenPawn::BeginPlay()
 	//プレーヤーポインター
 	Raiden = Cast<ARaiden>(UGameplayStatics::GetPlayerPawn(this, 0));
 
+	//カプセルにhitイベントをつける
+	if (CapsuleComp)
+	{
+		CapsuleComp->OnComponentHit.AddDynamic(this, &AEnemyRaidenPawn::OnEnemyHit);
+	}
+
 	FTimerHandle FireTimerHandle;
 
 	GetWorldTimerManager().SetTimer(FireTimerHandle, this, &AEnemyRaidenPawn::CheckFireCondition, FireRate, true);
+
 }
 
 void AEnemyRaidenPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	//プレーヤーが死んでるか
+	if (Raiden && !Raiden->IsAlive)
+	{
+		return;
+	}
 
 	FVector CurrentLocation = GetActorLocation();
 	//basic movement
@@ -70,7 +84,7 @@ void AEnemyRaidenPawn::Tick(float DeltaTime)
 
 void AEnemyRaidenPawn::CheckFireCondition()
 {
-	if (Raiden && InFireRange() && bIsFiringPhase && !bIsOutOfBounds)
+	if (Raiden && Raiden->IsAlive && InFireRange() && bIsFiringPhase && !bIsOutOfBounds)
 	{
 		fire();
 	}
@@ -94,4 +108,32 @@ void AEnemyRaidenPawn::HandleDestruction()
 	Super::HandleDestruction();
 
 	Destroy();
+}
+
+void AEnemyRaidenPawn::OnEnemyHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	//自身ではないの有効なコンフリクト
+	if (OtherActor && OtherActor != this)
+	{
+		ARaiden* HitPlayer = Cast<ARaiden>(OtherActor);
+		//プレーヤーがどうか
+		if (HitPlayer && HitPlayer->IsAlive)
+		{
+			//敵の最大生命を保存する用の変数
+			float EnemyMaxHP = 0.0f;
+
+			//自身のhealthcompを獲得、maxHealthを獲得
+			UHealthComponent* EnemyHealthComp = FindComponentByClass<UHealthComponent>();
+			if (EnemyHealthComp)
+			{
+				EnemyMaxHP = EnemyHealthComp->maxHealth;
+			}
+
+			//プレーヤーにダメージを与える
+			UGameplayStatics::ApplyDamage(HitPlayer, EnemyMaxHP, nullptr, this, UDamageType::StaticClass());
+
+			//自分にmaxhealthを引く--直接に普通の死亡処理する
+			UGameplayStatics::ApplyDamage(this, EnemyMaxHP, nullptr, this, UDamageType::StaticClass());
+		}
+	}
 }
