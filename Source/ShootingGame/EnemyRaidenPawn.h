@@ -46,6 +46,10 @@ public:
 	void CheckFireCondition();
 	void HandleDestruction();
 
+	//プレーヤーに衝突の場合
+	UFUNCTION()
+	void OnEnemyHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
+
 private:
 	float FireCycleTimer = 0.0f;
 	bool bIsFiringPhase = true;
