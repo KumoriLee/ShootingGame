@@ -62,18 +62,7 @@ void ARaiden::Tick(float DeltaTime)
 		//デバッグ用のcapsuleを描画する
 		DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, FQuat::Identity, FColor::Green, false, -1.0f, 0, 2.0f);
 	}
-	//傾斜処理
-	if (BaseMesh)
-	{
-		
-		FRotator CurrentMeshRotation = BaseMesh->GetRelativeRotation();
-
-		//数値を滑らかに補正
-		float NewRoll = FMath::FInterpTo(CurrentMeshRotation.Roll, TargetRoll, DeltaTime, RollInterpSpeed);
-
-		// 機体の回転を更新（Roll のみ変更）
-		BaseMesh->SetRelativeRotation(FRotator(CurrentMeshRotation.Pitch, CurrentMeshRotation.Yaw, NewRoll));
-	}
+	
 	
 	
 }

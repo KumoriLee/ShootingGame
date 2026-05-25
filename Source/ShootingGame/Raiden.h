@@ -33,8 +33,6 @@ protected:
 	virtual void BeginPlay() override;
 	//ボタンを離れた時の処理
 	void StopMoveInput(const FInputActionValue& Value);
-	//現在の目標傾斜角度
-	float TargetRoll = 0.0f;
 
 	//連射するためにtimerを作る
 
@@ -75,13 +73,6 @@ public:
 	//デフォルト値
 	UPROPERTY(EditAnywhere)
 	float Speed = 300.0f;//速度
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float MaxRollAngle = 45.0f;//傾斜角度
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float RollInterpSpeed = 5.0f;//傾斜のスムース遷移速度
-
 
 	APlayerController* PlayerController;
 
