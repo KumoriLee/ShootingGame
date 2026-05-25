@@ -21,6 +21,8 @@ public:
 	// Sets default values for this pawn's properties
 	ABasePawn();
 
+	virtual void Tick(float DeltaTime) override;
+
 	//コライダー
 	UPROPERTY(VisibleAnywhere)
 	UCapsuleComponent* CapsuleComp;
@@ -37,6 +39,19 @@ public:
 	TSubclassOf<AProjectile> ProjectileClass;
 
 
+	//傾斜に関する変数
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	bool bCanRoll = true;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float MaxRollAngle = 45.0f;//傾斜角度
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+	float RollInterpSpeed = 5.0f;//傾斜のスムース遷移速度
+
+protected:
+	//今の傾斜角度
+	float TargetRoll = 0.0f;
 
 	void fire();
 

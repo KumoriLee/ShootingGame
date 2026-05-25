@@ -38,15 +38,34 @@ void AEnemyRaidenPawn::Tick(float DeltaTime)
 	//basic movement
 	CurrentLocation.X += ForwardSpeed * DeltaTime;
 
-	// Y軸追跡ロジック
+	// Y軸の追跡および傾きトリガーのロジック
 	if (Raiden)
 	{
 		float DistanceToPlayer = FVector::Dist(CurrentLocation, Raiden->GetActorLocation());
 		if (DistanceToPlayer <= SearchRange)
 		{
-			// プレイヤーのY座標を滑らかに追跡
 			float TargetY = Raiden->GetActorLocation().Y;
+
+			// Y軸の差を計算し、左右どちらに飛ぶかを判定する
+			float DeltaY = TargetY - CurrentLocation.Y;
+
+			// スムーズな移動
 			CurrentLocation.Y = FMath::FInterpConstantTo(CurrentLocation.Y, TargetY, DeltaTime, YTargetSpeed);
+
+			// 動的な傾き：目標のY軸との距離が10を超えた場合、傾きをトリガーする
+			if (FMath::Abs(DeltaY) > 10.0f)
+			{
+				// 差の正負に応じて、左に傾くか右に傾くかを決定する
+				TargetRoll = (DeltaY > 0) ? MaxRollAngle : -MaxRollAngle;
+			}
+			else
+			{
+				TargetRoll = 0.0f; // 追跡位置に到達、姿勢を戻す
+			}
+		}
+		else
+		{
+			TargetRoll = 0.0f; // 追跡範囲外のため、正面への飛行を維持する
 		}
 	}
 	SetActorLocation(CurrentLocation);
@@ -119,6 +138,8 @@ void AEnemyRaidenPawn::OnEnemyHit(UPrimitiveComponent* HitComponent, AActor* Oth
 		//プレーヤーがどうか
 		if (HitPlayer && HitPlayer->IsAlive)
 		{
+			UE_LOG(LogTemp, Display, TEXT("Crashed"));
+
 			//敵の最大生命を保存する用の変数
 			float EnemyMaxHP = 0.0f;
 

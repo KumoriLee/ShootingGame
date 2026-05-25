@@ -20,6 +20,25 @@ ABasePawn::ABasePawn()
 	ProjectileSpawnPoint->SetupAttachment(BaseMesh);
 }
 
+void ABasePawn::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	//傾斜処理
+	if (BaseMesh)
+	{
+		//傾斜できない場合は角度を０にする--異常状況でずっと傾斜して戻れないことを防ぐため
+		float RealTargetRoll = bCanRoll ? TargetRoll : 0.0f;
+
+		FRotator CurrentMeshRotation = BaseMesh->GetRelativeRotation();
+
+		//数値を滑らかに補正
+		float NewRoll = FMath::FInterpTo(CurrentMeshRotation.Roll, RealTargetRoll, DeltaTime, RollInterpSpeed);
+
+		// 機体の回転を更新（Roll のみ変更）
+		BaseMesh->SetRelativeRotation(FRotator(CurrentMeshRotation.Pitch, CurrentMeshRotation.Yaw, NewRoll));
+	}
+}
+
 void ABasePawn::fire()
 {
 	//ProjectileSpawnPointの場所で弾を生成
