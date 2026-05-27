@@ -16,7 +16,7 @@ AProjectile::AProjectile()
 
 	ProjectileMovementComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComp"));
 
-	// 飞行拖尾粒子（附着在弹丸上持续播放）
+	// 飛行軌跡の尾引きパーティクル（弾にアタッチして持続再生）
 	TrialParticles = CreateDefaultSubobject<UNiagaraComponent>(TEXT("TrialParticles"));
 	TrialParticles->SetupAttachment(RootComponent);
 
@@ -27,20 +27,19 @@ AProjectile::AProjectile()
 void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
-	//デリケート
+	//デリゲート
 	ProjectileMesh->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
 
 	// 生成時にプレイヤーを一度だけ取得し、毎フレームの取得を回避
 	CachedPlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
 
-	// 播放发射音效
+	// 発射音を再生
 	if (LaunchSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), LaunchSound, GetActorLocation());
 	}
 }
 
-// Called every frame
 void AProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -77,13 +76,13 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 			);
 		}
 
-		// 生成命中粒子特效
+		// 命中パーティクルエフェクトを生成
 		if (HitParticles)
 		{
 			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), HitParticles, GetActorLocation(), GetActorRotation());
 		}
 
-		// 播放命中音效
+		// 命中音を再生
 		if (HitSound)
 		{
 			UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, GetActorLocation());

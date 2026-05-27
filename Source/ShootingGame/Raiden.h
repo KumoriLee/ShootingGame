@@ -31,7 +31,10 @@ class SHOOTINGGAME_API ARaiden : public ABasePawn
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	//ボタンを離れた時の処理
+	/**
+	 * ボタン解放時の移動停止処理
+	 * @param Value 入力アクション値（バインドシグネチャ準拠のため受け取るのみ）
+	 */
 	void StopMoveInput(const FInputActionValue& Value);
 
 	//連射するためにtimerを作る
@@ -46,10 +49,16 @@ protected:
 public:
 	ARaiden();
 
-	// Called every frame
+	/**
+	 * 毎フレーム更新処理（デバッグ用カプセル描画）
+	 * @param DeltaTime フレームのデルタ時間（秒）
+	 */
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
+	/**
+	 * 入力コンポーネントをセットアップし、アクションとのバインドを行う
+	 * @param PlayerInputComponent このPawnに割り当てられた入力コンポーネント
+	 */
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	//入力対応
@@ -79,11 +88,18 @@ public:
 	bool IsAlive = true;
 
 
-	//メソッド
+	/**
+	 * 入力方向に基づいてプレイヤーを移動させる
+	 * @param Value EnhancedInput からの2D入力値（X:左右, Y:前後）
+	 */
 	void MoveInput(const FInputActionValue& Value);
 	void FireInput();
 
 	void HandleDestruction();
+	/**
+	 * プレイヤーの入力受付を有効/無効に切り替える
+	 * @param Enabled true で入力を有効化、false で無効化（TargetRoll もリセット）
+	 */
 	void SetPlayerEnabled(bool Enabled);
 
 	

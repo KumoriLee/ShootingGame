@@ -21,6 +21,10 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	/**
+	 * 毎フレーム更新処理（移動、射撃サイクル、範囲外判定）
+	 * @param DeltaTime フレームのデルタ時間（秒）
+	 */
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditAnywhere, Category = "Combat")
@@ -46,7 +50,14 @@ public:
 	void CheckFireCondition();
 	void HandleDestruction();
 
-	//プレーヤーに衝突の場合
+	/**
+	 * 敵機同士または敵機とプレイヤーの衝突処理
+	 * @param HitComponent 衝突した自身のコンポーネント
+	 * @param OtherActor  衝突相手のアクター
+	 * @param OtherComp   衝突相手のコンポーネント
+	 * @param NormalImpulse 衝突の法線インパルス
+	 * @param Hit         衝突詳細情報
+	 */
 	UFUNCTION()
 	void OnEnemyHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 

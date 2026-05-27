@@ -6,8 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
-#include "NiagaraComponent.h"			// Niagara 组件：附着在 Actor 上的粒子系统
-#include "NiagaraFunctionLibrary.h"		// Niagara 函数库：在场景中生成粒子特效
+#include "NiagaraComponent.h"			// Niagara コンポーネント：アクターにアタッチするパーティクルシステム
+#include "NiagaraFunctionLibrary.h"		// Niagara 関数ライブラリ：シーン上にパーティクルエフェクトを生成
 
 
 #include "Projectile.generated.h"
@@ -26,7 +26,10 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	// Called every frame
+	/**
+	 * 毎フレーム更新処理（画面外判定と自動破棄）
+	 * @param DeltaTime フレームのデルタ時間（秒）
+	 */
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(VisibleAnywhere)
@@ -35,19 +38,19 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	UProjectileMovementComponent* ProjectileMovementComp;
 
-	/** 飞行轨迹拖尾粒子（附着在弹丸上持续播放） */
+	/** 飛行軌跡の尾引きパーティクル（弾にアタッチして持続再生） */
 	UPROPERTY(VisibleAnywhere)
 	UNiagaraComponent* TrialParticles;
 
-	/** 击中时生成的爆炸粒子系统 */
+	/** 命中時に生成する爆発パーティクルシステム */
 	UPROPERTY(EditAnywhere)
 	UNiagaraSystem* HitParticles;
 
-	/** 发射音效 */
+	/** 発射音 */
 	UPROPERTY(EditAnywhere)
 	USoundBase* LaunchSound;
 
-	/** 击中音效 */
+	/** 命中音 */
 	UPROPERTY(EditAnywhere)
 	USoundBase* HitSound;
 
@@ -55,6 +58,14 @@ public:
 	UPROPERTY(EditAnywhere)
 	float Damage = 25.0f;
 
+	/**
+	 * 弾の衝突処理
+	 * @param HitComponent 衝突した自身のメッシュコンポーネント
+	 * @param OtherActor   衝突相手のアクター
+	 * @param OtherComp    衝突相手のコンポーネント
+	 * @param NormalImpulse 衝突の法線インパルス
+	 * @param Hit          衝突詳細情報
+	 */
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
