@@ -34,6 +34,14 @@ public:
 
 	AShootingGameMode* ShootingGameMode;
 
+	/**
+	 * ダメージ通知を受け取り、HPを減算する
+	 * @param DamagedActor  ダメージを受けたアクター
+	 * @param Damage        ダメージ量
+	 * @param DamageType    ダメージの種類
+	 * @param InstigatedBy  ダメージを引き起こしたコントローラー
+	 * @param DamageCauser  ダメージを引き起こしたアクター
+	 */
 	UFUNCTION()
 	void OnDamageTaken(
 		AActor* DamagedActor,

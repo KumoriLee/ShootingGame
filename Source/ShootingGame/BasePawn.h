@@ -9,7 +9,7 @@
 
 #include "Projectile.h"
 
-#include "NiagaraFunctionLibrary.h"		// Niagara 粒子系统工具库（生成粒子特效）
+#include "NiagaraFunctionLibrary.h"		// Niagara パーティクルシステムユーティリティ（エフェクト生成）
 
 #include "BasePawn.generated.h"
 
@@ -22,6 +22,10 @@ public:
 	// Sets default values for this pawn's properties
 	ABasePawn();
 
+	/**
+	 * 機体傾斜の更新処理
+	 * @param DeltaTime フレームのデルタ時間（秒）
+	 */
 	virtual void Tick(float DeltaTime) override;
 
 	//コライダー
@@ -58,11 +62,11 @@ protected:
 
 	void HandleDestruction();
 
-	/** 死亡时播放的 Niagara 粒子系统 */
+	/** 死亡時に再生する Niagara パーティクルシステム */
 	UPROPERTY(EditAnywhere)
 	UNiagaraSystem* DeathParticles;
 
-	/** 死亡时播放的音效 */
+	/** 死亡時に再生するサウンド */
 	UPROPERTY(EditAnywhere)
 	USoundBase* BoomSound;
 

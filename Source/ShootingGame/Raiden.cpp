@@ -43,7 +43,6 @@ void ARaiden::BeginPlay()
 		}
 	}
 }
-//離れた時ゼロにする
 void ARaiden::StopMoveInput(const FInputActionValue& Value)
 {
 	TargetRoll = 0.0f;
@@ -142,6 +141,7 @@ void ARaiden::SetPlayerEnabled(bool Enabled)
 		else
 		{
 			DisableInput(PlayerController);
+			TargetRoll = 0.0f;
 		}
 	}
 }
