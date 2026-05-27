@@ -16,6 +16,11 @@ AProjectile::AProjectile()
 
 	ProjectileMovementComp = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComp"));
 
+	// 飞行拖尾粒子（附着在弹丸上持续播放）
+	TrialParticles = CreateDefaultSubobject<UNiagaraComponent>(TEXT("TrialParticles"));
+	TrialParticles->SetupAttachment(RootComponent);
+
+
 }
 
 // Called when the game starts or when spawned
@@ -27,6 +32,12 @@ void AProjectile::BeginPlay()
 
 	// 生成時にプレイヤーを一度だけ取得し、毎フレームの取得を回避
 	CachedPlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
+
+	// 播放发射音效
+	if (LaunchSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), LaunchSound, GetActorLocation());
+	}
 }
 
 // Called every frame
@@ -64,6 +75,18 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 				this,
 				UDamageType::StaticClass()
 			);
+		}
+
+		// 生成命中粒子特效
+		if (HitParticles)
+		{
+			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), HitParticles, GetActorLocation(), GetActorRotation());
+		}
+
+		// 播放命中音效
+		if (HitSound)
+		{
+			UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, GetActorLocation());
 		}
 	}
 	Destroy();

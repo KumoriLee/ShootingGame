@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
+#include "NiagaraComponent.h"			// Niagara 组件：附着在 Actor 上的粒子系统
+#include "NiagaraFunctionLibrary.h"		// Niagara 函数库：在场景中生成粒子特效
+
 
 #include "Projectile.generated.h"
 
@@ -31,6 +34,23 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	UProjectileMovementComponent* ProjectileMovementComp;
+
+	/** 飞行轨迹拖尾粒子（附着在弹丸上持续播放） */
+	UPROPERTY(VisibleAnywhere)
+	UNiagaraComponent* TrialParticles;
+
+	/** 击中时生成的爆炸粒子系统 */
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* HitParticles;
+
+	/** 发射音效 */
+	UPROPERTY(EditAnywhere)
+	USoundBase* LaunchSound;
+
+	/** 击中音效 */
+	UPROPERTY(EditAnywhere)
+	USoundBase* HitSound;
+
 
 	UPROPERTY(EditAnywhere)
 	float Damage = 25.0f;
