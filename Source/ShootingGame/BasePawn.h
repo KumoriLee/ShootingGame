@@ -9,6 +9,7 @@
 
 #include "Projectile.h"
 
+#include "NiagaraFunctionLibrary.h"		// Niagara 粒子系统工具库（生成粒子特效）
 
 #include "BasePawn.generated.h"
 
@@ -56,5 +57,15 @@ protected:
 	void fire();
 
 	void HandleDestruction();
+
+	/** 死亡时播放的 Niagara 粒子系统 */
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* DeathParticles;
+
+	/** 死亡时播放的音效 */
+	UPROPERTY(EditAnywhere)
+	USoundBase* BoomSound;
+
+
 
 };

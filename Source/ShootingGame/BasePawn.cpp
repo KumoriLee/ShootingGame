@@ -2,6 +2,7 @@
 
 
 #include "BasePawn.h"
+#include "Kismet/GameplayStatics.h"	// 游戏静态工具函数：PlaySoundAtLocation 等
 
 // Sets default values
 ABasePawn::ABasePawn()
@@ -55,4 +56,16 @@ void ABasePawn::fire()
 
 void ABasePawn::HandleDestruction()
 {
+	// 生成死亡 Niagara 粒子特效
+	if (DeathParticles)
+	{
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), DeathParticles, GetActorLocation(), GetActorRotation());
+	}
+
+	// 播放爆炸音效
+	if (BoomSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), BoomSound, GetActorLocation());
+	}
+
 }
