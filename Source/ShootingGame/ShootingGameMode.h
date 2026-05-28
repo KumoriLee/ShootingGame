@@ -7,6 +7,7 @@
 
 #include "Raiden.h"
 #include "EnemyRaidenPawn.h"
+#include "ScreenMessage.h"
 #include "ShootingGameMode.generated.h"
 
 /**
@@ -39,9 +40,10 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Game Rules")
 	float GameDuration = 30.0f; // ゲームの制限時間（秒）
 
-	UPROPERTY(EditAnywhere, Category = "Game Rules")
-	float RestartDelay = 3.0f; // 死亡後リスタートまでの待機時間（秒）
 	// ================================================================
+
+	UPROPERTY(EditAnywhere, Category = "UI")
+	TSubclassOf<UScreenMessage> ScreenMessageClass;
 
 	/**
 	 * アクターが死亡した際の処理
@@ -56,11 +58,19 @@ public:
 	UFUNCTION(BlueprintPure, Category = "Game Rules")
 	float GetGameTimeRemaining() const;
 
+	bool bGameEnded = false;
+
+	void RestartGame();  // 現在のレベルを再読み込みしてリスタート
+
 private:
 	FTimerHandle SpawnTimerHandle;
-	FTimerHandle StartDelayTimerHandle; // ゲーム開始カウントダウンのタイマーハンドル
-	FTimerHandle GameTimerHandle;       // 30秒制限時間のタイマーハンドル
-	FTimerHandle RestartTimerHandle;    // リスタートカウントダウンのタイマーハンドル
+	FTimerHandle GameTimerHandle;             // 30秒制限時間のタイマーハンドル
+	FTimerHandle CountdownTimerHandle;        // カウントダウン表示更新（1秒ごと）
+	FTimerHandle UITimerHandle;               // ゲーム中 Time 表示更新
+
+	int32 CountdownStep;          // カウントダウン現在値（3→2→1→0でGo）
+
+	UScreenMessage* ScreenMessageWidget;
 
 	/**
 	 * 敵を生成する
@@ -71,7 +81,6 @@ private:
 	// ゲーム状態制御関数
 	void StartGame();    // カウントダウン終了、ゲーム開始
 	void EndGame();      // 制限時間到達、ゲーム終了
-	void RestartGame();  // 現在のレベルを再読み込みしてリスタート
 
 	/**
 	 * シーン内の全敵機のTickを停止する

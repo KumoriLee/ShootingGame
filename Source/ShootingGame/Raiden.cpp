@@ -10,6 +10,7 @@
 
 //UGameplayStatics
 #include "Kismet/GameplayStatics.h"
+#include "ShootingGameMode.h"
 
 
 
@@ -78,11 +79,14 @@ void ARaiden::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EIC->BindAction(MoveAction, ETriggerEvent::Canceled, this, &ARaiden::StopMoveInput);
 
 		EIC->BindAction(FireAction, ETriggerEvent::Triggered, this, &ARaiden::FireInput);
+		EIC->BindAction(RestartAction, ETriggerEvent::Triggered, this, &ARaiden::OnRestartInput);
 	}
 }
 
 void ARaiden::MoveInput(const FInputActionValue& Value)
 {
+	if (!bCanAct || !IsAlive) return;
+
 	//入力システムから Vector2D の値を取得
 	FVector2D MovementVector = Value.Get<FVector2D>();
 	float DeltaTime = UGameplayStatics::GetWorldDeltaSeconds(GetWorld());
@@ -107,6 +111,8 @@ void ARaiden::MoveInput(const FInputActionValue& Value)
 
 void ARaiden::FireInput()
 {
+	if (!bCanAct || !IsAlive) return;
+
 	//現在のゲーム内の絶対時間を取得（秒）
 	float CurrentTime = GetWorld()->GetTimeSeconds();
 
@@ -127,11 +133,12 @@ void ARaiden::HandleDestruction()
 	IsAlive = false;
 	SetActorHiddenInGame(true);
 	SetActorTickEnabled(false);
-	SetPlayerEnabled(false);
 }
 
 void ARaiden::SetPlayerEnabled(bool Enabled)
 {
+	bCanAct = Enabled;
+
 	if (PlayerController)
 	{
 		if (Enabled)
@@ -146,4 +153,11 @@ void ARaiden::SetPlayerEnabled(bool Enabled)
 	}
 }
 
-
+void ARaiden::OnRestartInput(const FInputActionValue& Value)
+{
+	AShootingGameMode* GM = Cast<AShootingGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (GM && GM->bGameEnded)
+	{
+		GM->RestartGame();
+	}
+}
