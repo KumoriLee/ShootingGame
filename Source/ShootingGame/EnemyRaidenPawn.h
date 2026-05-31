@@ -68,6 +68,10 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	class UFrameComponent* FrameComp;
 
+	UPROPERTY(VisibleAnywhere)
+	class UHealthComponent* HealthComp;
+
+
 
 private:
 	float FireCycleTimer = 0.0f;

@@ -11,6 +11,9 @@ AEnemyRaidenPawn::AEnemyRaidenPawn()
 {
 	// 画面範囲外判定コンポーネント。bAutoDestroy=false に設定し、範囲外時の破棄は委任で自前処理
 	FrameComp = CreateDefaultSubobject<UFrameComponent>(TEXT("FrameComp"));
+
+	HealthComp = CreateDefaultSubobject<UHealthComponent>(TEXT("HtalthComp"));
+
 }
 
 void AEnemyRaidenPawn::BeginPlay()
