@@ -28,7 +28,6 @@ void AEnemyRaidenPawn::BeginPlay()
 		CapsuleComp->OnComponentHit.AddDynamic(this, &AEnemyRaidenPawn::OnEnemyHit);
 	}
 
-	FTimerHandle FireTimerHandle;
 
 	GetWorldTimerManager().SetTimer(FireTimerHandle, this, &AEnemyRaidenPawn::CheckFireCondition, FireRate, true);
 

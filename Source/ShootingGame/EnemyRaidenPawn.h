@@ -73,5 +73,6 @@ private:
 	float FireCycleTimer = 0.0f;
 	bool bIsFiringPhase = true;
 
+	FTimerHandle FireTimerHandle;
 
 };

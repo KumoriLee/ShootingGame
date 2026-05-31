@@ -151,6 +151,7 @@ void AShootingGameMode::StopEnemy()
 		if (Enemy)
 		{
 			Enemy->SetActorTickEnabled(false);
+			GetWorldTimerManager().ClearAllTimersForObject(Enemy);
 		}
 	}
 }
