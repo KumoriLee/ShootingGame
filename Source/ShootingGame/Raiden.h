@@ -107,5 +107,6 @@ public:
 	void SetPlayerEnabled(bool Enabled);
 	void OnRestartInput(const FInputActionValue& Value);
 
-	
+	UPROPERTY(VisibleAnywhere)
+	class UHealthComponent* HealthComp;
 };
