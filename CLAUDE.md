@@ -32,7 +32,8 @@ AActor
 
 ```
 UActorComponent
- └── UHealthComponent  — 体力：OnTakeAnyDamage → health<=0 で GameMode::ActorDied()
+ ├── UHealthComponent  — 体力：OnTakeAnyDamage → health<=0 で GameMode::ActorDied()
+ └── UFrameComponent   — 画面範囲外判定：Owner.X > Player.X + Distance で OnOutOfBounds 委任、bAutoDestroy で SetLifeSpan
 ```
 
 ```

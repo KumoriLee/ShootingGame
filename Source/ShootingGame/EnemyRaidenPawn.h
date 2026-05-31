@@ -21,6 +21,8 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	AEnemyRaidenPawn();
+
 	/**
 	 * 毎フレーム更新処理（移動、射撃サイクル、範囲外判定）
 	 * @param DeltaTime フレームのデルタ時間（秒）
@@ -50,6 +52,7 @@ public:
 	void CheckFireCondition();
 	void HandleDestruction();
 
+
 	/**
 	 * 敵機同士または敵機とプレイヤーの衝突処理
 	 * @param HitComponent 衝突した自身のコンポーネント
@@ -61,9 +64,14 @@ public:
 	UFUNCTION()
 	void OnEnemyHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
+	/** 画面範囲外判定コンポーネント。bAutoDestroy=false で委任により自爆処理を制御 */
+	UPROPERTY(VisibleAnywhere)
+	class UFrameComponent* FrameComp;
+
+
 private:
 	float FireCycleTimer = 0.0f;
 	bool bIsFiringPhase = true;
-	bool bIsOutOfBounds = false;
+
 
 };
