@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+##默认对话用中文
+##只有在代码里写注释的时候用日文
+
+
 ## Build
 
 ```
