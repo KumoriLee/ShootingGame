@@ -71,6 +71,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* FireAction;
 
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* RestartAction;
+
 	//カメラコンポーネント
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArmComp;
@@ -86,6 +89,7 @@ public:
 	APlayerController* PlayerController;
 
 	bool IsAlive = true;
+	bool bCanAct = true;
 
 
 	/**
@@ -101,6 +105,7 @@ public:
 	 * @param Enabled true で入力を有効化、false で無効化（TargetRoll もリセット）
 	 */
 	void SetPlayerEnabled(bool Enabled);
+	void OnRestartInput(const FInputActionValue& Value);
 
 	
 };

@@ -80,3 +80,5 @@ BeginPlay → 3-2-1-Go カウントダウン → StartGame → [プレイ中]
 - ゲーム終了後は `bCanAct=false` で移動/射撃だけ止め、IA_Restart は通す
 - IMC は BP_ShootingGameController で設定
 
+## コメントは日本語
+##对话用中文

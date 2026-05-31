@@ -1,9 +1,9 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "ShootingGameMode.h"
 #include "Kismet/GameplayStatics.h"
-#include "TimerManager.h" // タイマーマネージャーを使用するために必要
+#include "TimerManager.h"
 
 
 void AShootingGameMode::BeginPlay()
@@ -22,50 +22,116 @@ void AShootingGameMode::BeginPlay()
 		}
 	}
 
-	// 1. ゲーム開始時は準備フェーズとして、プレイヤーの移動と射撃を無効化
+	// プレイヤー操作を無効化（カウントダウン中）
 	if (raiden)
 	{
 		raiden->SetPlayerEnabled(false);
 	}
 
-	// 2. 開始前3秒のカウントダウンを開始、満了時にStartGameを実行
-	GetWorldTimerManager().SetTimer(StartDelayTimerHandle, this, &AShootingGameMode::StartGame, StartDelay, false);
+	// UIウィジェットを作成してビューポートに追加
+	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (ScreenMessageClass && PC)
+	{
+		ScreenMessageWidget = CreateWidget<UScreenMessage>(PC, ScreenMessageClass);
+		if (ScreenMessageWidget)
+		{
+			ScreenMessageWidget->AddToViewport();
+			ScreenMessageWidget->SetMessageText(TEXT("3"));
+		}
+	}
+
+	// 1秒ごとにカウントダウン表示を更新（3 → 2 → 1 → Go）
+	CountdownStep = 3;
+	GetWorldTimerManager().SetTimer(CountdownTimerHandle, [this]()
+	{
+		CountdownStep--;
+
+		if (!ScreenMessageWidget) return;
+
+		if (CountdownStep > 0)
+		{
+			ScreenMessageWidget->SetMessageText(FString::FromInt(CountdownStep));
+		}
+		else
+		{
+			// "Go" を表示
+			ScreenMessageWidget->SetMessageText(TEXT("Go"));
+			GetWorldTimerManager().ClearTimer(CountdownTimerHandle);
+
+			// 0.6秒後に "Go" を消してゲーム開始
+			FTimerHandle GoTimer;
+			GetWorldTimerManager().SetTimer(GoTimer, [this]()
+			{
+				if (ScreenMessageWidget)
+				{
+					ScreenMessageWidget->SetMessageText(TEXT(""));
+				}
+				StartGame();
+			}, 0.6f, false);
+		}
+	}, 1.0f, true);
 }
 
 void AShootingGameMode::StartGame()
 {
-	// カウントダウン終了、ゲーム本開始
-
-	// 1. プレイヤーの操作を再有効化
+	// プレイヤーの操作を再有効化
 	if (raiden)
 	{
 		raiden->SetPlayerEnabled(true);
 	}
 
-	// 2. 敵の出現を開始
+	// 敵の出現を開始
 	GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &AShootingGameMode::SpawnEnemy, SpawnInterval, true);
 
-	// 3. 30秒のゲーム制限時間を開始、満了時にEndGameを実行
+	// ゲーム制限時間を開始、満了時にEndGameを実行
 	GetWorldTimerManager().SetTimer(GameTimerHandle, this, &AShootingGameMode::EndGame, GameDuration, false);
+
+	// UIの初期表示
+	if (ScreenMessageWidget)
+	{
+		ScreenMessageWidget->SetPointText(point);
+		ScreenMessageWidget->SetTimeText(FMath::CeilToInt(GameDuration));
+	}
+
+	// Time 表示を 0.2秒ごとに更新
+	GetWorldTimerManager().SetTimer(UITimerHandle, [this]()
+	{
+		if (ScreenMessageWidget)
+		{
+			float Remaining = GetWorldTimerManager().GetTimerRemaining(GameTimerHandle);
+			ScreenMessageWidget->SetTimeText(FMath::CeilToInt(Remaining));
+		}
+	}, 0.2f, true);
 }
 
 void AShootingGameMode::EndGame()
 {
-	// 制限時間経過！
+	// 制限時間経過
 	StopEnemy();
-	// 1. 敵の出現を停止
 	GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
+	GetWorldTimerManager().ClearTimer(UITimerHandle);
 
-	// 2. プレイヤー操作を無効化し、「時間切れで動けない」状態を表現
 	if (raiden && raiden->IsAlive)
 	{
-		raiden->SetPlayerEnabled(false);
+		raiden->bCanAct = false;
 	}
 
-	GetWorldTimerManager().SetTimer(RestartTimerHandle, this, &AShootingGameMode::RestartGame, RestartDelay, false);
+	bGameEnded = true;
 
-	// ゲームオーバー/勝利UIを表示するロジックをここに追加可能
-	UE_LOG(LogTemp, Warning, TEXT("Time is up! Game Over!"));
+	if (ScreenMessageWidget)
+	{
+		ScreenMessageWidget->SetMessageText(TEXT("Victory"));
+	}
+
+	// 1.5秒後に "Click to Restart" を表示（実際のリスタートは OnRestartInput で処理）
+	FTimerHandle PromptTimer;
+	GetWorldTimerManager().SetTimer(PromptTimer, [this]()
+	{
+		if (ScreenMessageWidget)
+		{
+			ScreenMessageWidget->SetMessageText(TEXT("Click to Restart"));
+		}
+	}, 1.5f, false);
 }
 
 void AShootingGameMode::RestartGame()
@@ -91,24 +157,34 @@ void AShootingGameMode::StopEnemy()
 
 void AShootingGameMode::ActorDied(AActor* DeadActor)
 {
-	bool IsGameOver = false;
-
 	if (DeadActor == raiden)
 	{
 		// プレイヤー死亡
 		raiden->HandleDestruction();
-		IsGameOver = true;
+
+		if (bGameEnded) return;
 
 		StopEnemy();
-
-		// 1. 敵の出現を停止
 		GetWorldTimerManager().ClearTimer(SpawnTimerHandle);
-
-		// 2. メインの制限時間カウントダウンも停止（ゲームが早期終了したため）
 		GetWorldTimerManager().ClearTimer(GameTimerHandle);
+		GetWorldTimerManager().ClearTimer(UITimerHandle);
 
-		// 3. 死亡後リスタートカウントダウン開始、満了時にRestartGameを実行
-		GetWorldTimerManager().SetTimer(RestartTimerHandle, this, &AShootingGameMode::RestartGame, RestartDelay, false);
+		bGameEnded = true;
+
+		if (ScreenMessageWidget)
+		{
+			ScreenMessageWidget->SetMessageText(TEXT("GameOver"));
+		}
+
+		// 1.5秒後に "Click to Restart" を表示（実際のリスタートは OnRestartInput で処理）
+		FTimerHandle PromptTimer;
+		GetWorldTimerManager().SetTimer(PromptTimer, [this]()
+		{
+			if (ScreenMessageWidget)
+			{
+				ScreenMessageWidget->SetMessageText(TEXT("Click to Restart"));
+			}
+		}, 1.5f, false);
 	}
 	else
 	{
@@ -118,6 +194,12 @@ void AShootingGameMode::ActorDied(AActor* DeadActor)
 		{
 			DeadEnemyRaiden->HandleDestruction();
 			point++;
+
+			// スコア表示を即時更新
+			if (ScreenMessageWidget)
+			{
+				ScreenMessageWidget->SetPointText(point);
+			}
 		}
 	}
 }
@@ -139,8 +221,8 @@ void AShootingGameMode::SpawnEnemy()
 
 float AShootingGameMode::GetStartDelayRemaining() const
 {
-	// ゲーム開始までの残り時間（秒）を返す
-	return GetWorldTimerManager().GetTimerRemaining(StartDelayTimerHandle);
+	// カウントダウン中の現在のステップ値を返す
+	return (float)CountdownStep;
 }
 
 float AShootingGameMode::GetGameTimeRemaining() const
