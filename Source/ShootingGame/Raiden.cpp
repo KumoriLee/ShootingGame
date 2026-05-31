@@ -11,6 +11,8 @@
 //UGameplayStatics
 #include "Kismet/GameplayStatics.h"
 #include "ShootingGameMode.h"
+#include "HealthComponent.h"
+
 
 
 
@@ -22,6 +24,9 @@ ARaiden::ARaiden()
 
 	CameraComp = CreateDefaultSubobject <UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(SpringArmComp);
+
+	HealthComp = CreateDefaultSubobject<UHealthComponent>(TEXT("HtalthComp"));
+
 
 }
 
