@@ -2,6 +2,7 @@
 
 
 #include "Projectile.h"
+#include "FrameComponent.h"
 #include "Kismet/GameplayStatics.h"
 
 
@@ -9,7 +10,7 @@
 AProjectile::AProjectile()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProjectileMesh"));
 	SetRootComponent(ProjectileMesh);
@@ -20,7 +21,8 @@ AProjectile::AProjectile()
 	TrialParticles = CreateDefaultSubobject<UNiagaraComponent>(TEXT("TrialParticles"));
 	TrialParticles->SetupAttachment(RootComponent);
 
-
+	// 画面範囲外判定コンポーネント。bAutoDestroy=true（既定）により、範囲外で自動 SetLifeSpan
+	FrameComp = CreateDefaultSubobject<UFrameComponent>(TEXT("FrameComp"));
 }
 
 // Called when the game starts or when spawned
@@ -30,9 +32,6 @@ void AProjectile::BeginPlay()
 	//デリゲート
 	ProjectileMesh->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
 
-	// 生成時にプレイヤーを一度だけ取得し、毎フレームの取得を回避
-	CachedPlayerPawn = UGameplayStatics::GetPlayerPawn(this, 0);
-
 	// 発射音を再生
 	if (LaunchSound)
 	{
@@ -40,25 +39,7 @@ void AProjectile::BeginPlay()
 	}
 }
 
-void AProjectile::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 
-	// 画面の相対範囲から外れたか判定
-	if (CachedPlayerPawn && !bIsOutOfBounds)
-	{
-		float PlayerX = CachedPlayerPawn->GetActorLocation().X;
-		float CurrentX = GetActorLocation().X;
-
-		// 弾がプレイヤーより後方、範囲外と判定
-		if (CurrentX > PlayerX + 500.0f)
-		{
-			bIsOutOfBounds = true;
-			// エンジン内蔵関数を呼び出し、3秒後にこの弾を自動的に破棄
-			SetLifeSpan(3.0f);
-		}
-	}
-}
 
 void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {

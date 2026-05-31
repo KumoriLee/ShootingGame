@@ -26,11 +26,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	/**
-	 * 毎フレーム更新処理（画面外判定と自動破棄）
-	 * @param DeltaTime フレームのデルタ時間（秒）
-	 */
-	virtual void Tick(float DeltaTime) override;
+	
 
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* ProjectileMesh;
@@ -69,7 +65,7 @@ public:
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
-private:
-	APawn* CachedPlayerPawn;
-	bool bIsOutOfBounds = false;
+	/** 画面範囲外判定コンポーネント。プレイヤー位置を基準に範囲外を検出し自動破棄する */
+	UPROPERTY(VisibleAnywhere)
+	class UFrameComponent* FrameComp;
 };

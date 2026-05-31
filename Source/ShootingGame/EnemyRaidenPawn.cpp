@@ -2,8 +2,16 @@
 
 
 #include "EnemyRaidenPawn.h"
+#include "FrameComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "HealthComponent.h"
+
+
+AEnemyRaidenPawn::AEnemyRaidenPawn()
+{
+	// 画面範囲外判定コンポーネント。bAutoDestroy=false に設定し、範囲外時の破棄は委任で自前処理
+	FrameComp = CreateDefaultSubobject<UFrameComponent>(TEXT("FrameComp"));
+}
 
 void AEnemyRaidenPawn::BeginPlay()
 {
@@ -11,6 +19,8 @@ void AEnemyRaidenPawn::BeginPlay()
 
 	//プレーヤーポインター
 	Raiden = Cast<ARaiden>(UGameplayStatics::GetPlayerPawn(this, 0));
+
+	
 
 	//カプセルにhitイベントをつける
 	if (CapsuleComp)
@@ -26,6 +36,7 @@ void AEnemyRaidenPawn::BeginPlay()
 
 void AEnemyRaidenPawn::Tick(float DeltaTime)
 {
+
 	Super::Tick(DeltaTime);
 
 	//プレーヤーが死んでるか
@@ -82,28 +93,14 @@ void AEnemyRaidenPawn::Tick(float DeltaTime)
 		bIsFiringPhase = true;
 		FireCycleTimer = 0.0f;
 	}
-
-	// カメラ範囲外への移動判定
-	if (Raiden && !bIsOutOfBounds)
-	{
-		float PlayerX = Raiden->GetActorLocation().X;
-
-		// 敵機のX座標が「プレイヤーのX座標 - 1500」より小さい場合
-		if (CurrentLocation.X > PlayerX + 500.0f)
-		{
-			bIsOutOfBounds = true;
-			bIsFiringPhase = false; // 射撃を停止
-
-			// 3秒後に自爆させるタイマーを開始
-			FTimerHandle DestroyTimerHandle;
-			GetWorldTimerManager().SetTimer(DestroyTimerHandle, this, &AEnemyRaidenPawn::HandleDestruction, 3.0f, false);
-		}
-	}
 }
 
 void AEnemyRaidenPawn::CheckFireCondition()
 {
-	if (Raiden && Raiden->IsAlive && InFireRange() && bIsFiringPhase && !bIsOutOfBounds)
+	
+
+	// 範囲外判定は FrameComp に問い合わせる（旧 bIsOutOfBounds フラグを置き換え）
+	if (Raiden && Raiden->IsAlive && InFireRange() && bIsFiringPhase && !FrameComp->IsOutOfBounds())
 	{
 		fire();
 	}
@@ -128,6 +125,7 @@ void AEnemyRaidenPawn::HandleDestruction()
 
 	Destroy();
 }
+
 
 void AEnemyRaidenPawn::OnEnemyHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
