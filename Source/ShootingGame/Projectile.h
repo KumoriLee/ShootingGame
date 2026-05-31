@@ -6,6 +6,9 @@
 #include "GameFramework/Actor.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
+#include "NiagaraComponent.h"			// Niagara コンポーネント：アクターにアタッチするパーティクルシステム
+#include "NiagaraFunctionLibrary.h"		// Niagara 関数ライブラリ：シーン上にパーティクルエフェクトを生成
+
 
 #include "Projectile.generated.h"
 
@@ -23,8 +26,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	
 
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* ProjectileMesh;
@@ -32,13 +34,38 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	UProjectileMovementComponent* ProjectileMovementComp;
 
+	/** 飛行軌跡の尾引きパーティクル（弾にアタッチして持続再生） */
+	UPROPERTY(VisibleAnywhere)
+	UNiagaraComponent* TrialParticles;
+
+	/** 命中時に生成する爆発パーティクルシステム */
+	UPROPERTY(EditAnywhere)
+	UNiagaraSystem* HitParticles;
+
+	/** 発射音 */
+	UPROPERTY(EditAnywhere)
+	USoundBase* LaunchSound;
+
+	/** 命中音 */
+	UPROPERTY(EditAnywhere)
+	USoundBase* HitSound;
+
+
 	UPROPERTY(EditAnywhere)
 	float Damage = 25.0f;
 
+	/**
+	 * 弾の衝突処理
+	 * @param HitComponent 衝突した自身のメッシュコンポーネント
+	 * @param OtherActor   衝突相手のアクター
+	 * @param OtherComp    衝突相手のコンポーネント
+	 * @param NormalImpulse 衝突の法線インパルス
+	 * @param Hit          衝突詳細情報
+	 */
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
-private:
-	APawn* CachedPlayerPawn;
-	bool bIsOutOfBounds = false;
+	/** 画面範囲外判定コンポーネント。プレイヤー位置を基準に範囲外を検出し自動破棄する */
+	UPROPERTY(VisibleAnywhere)
+	class UFrameComponent* FrameComp;
 };

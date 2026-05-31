@@ -31,10 +31,11 @@ class SHOOTINGGAME_API ARaiden : public ABasePawn
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	//ボタンを離れた時の処理
+	/**
+	 * ボタン解放時の移動停止処理
+	 * @param Value 入力アクション値（バインドシグネチャ準拠のため受け取るのみ）
+	 */
 	void StopMoveInput(const FInputActionValue& Value);
-	//現在の目標傾斜角度
-	float TargetRoll = 0.0f;
 
 	//連射するためにtimerを作る
 
@@ -48,10 +49,16 @@ protected:
 public:
 	ARaiden();
 
-	// Called every frame
+	/**
+	 * 毎フレーム更新処理（デバッグ用カプセル描画）
+	 * @param DeltaTime フレームのデルタ時間（秒）
+	 */
 	virtual void Tick(float DeltaTime) override;
 
-	// Called to bind functionality to input
+	/**
+	 * 入力コンポーネントをセットアップし、アクションとのバインドを行う
+	 * @param PlayerInputComponent このPawnに割り当てられた入力コンポーネント
+	 */
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	//入力対応
@@ -63,6 +70,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* FireAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* RestartAction;
 
 	//カメラコンポーネント
 	UPROPERTY(VisibleAnywhere)
@@ -76,16 +86,26 @@ public:
 	UPROPERTY(EditAnywhere)
 	float Speed = 300.0f;//速度
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float MaxRollAngle = 45.0f;//傾斜角度
+	APlayerController* PlayerController;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float RollInterpSpeed = 5.0f;//傾斜のスムース遷移速度
-
+	bool IsAlive = true;
+	bool bCanAct = true;
 
 
-	//メソッド
+	/**
+	 * 入力方向に基づいてプレイヤーを移動させる
+	 * @param Value EnhancedInput からの2D入力値（X:左右, Y:前後）
+	 */
 	void MoveInput(const FInputActionValue& Value);
 	void FireInput();
+
+	void HandleDestruction();
+	/**
+	 * プレイヤーの入力受付を有効/無効に切り替える
+	 * @param Enabled true で入力を有効化、false で無効化（TargetRoll もリセット）
+	 */
+	void SetPlayerEnabled(bool Enabled);
+	void OnRestartInput(const FInputActionValue& Value);
+
 	
 };

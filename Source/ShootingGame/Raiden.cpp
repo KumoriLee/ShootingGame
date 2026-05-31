@@ -10,6 +10,7 @@
 
 //UGameplayStatics
 #include "Kismet/GameplayStatics.h"
+#include "ShootingGameMode.h"
 
 
 
@@ -28,9 +29,9 @@ void ARaiden::BeginPlay()
 {
 	Super::BeginPlay();
 
-
+	PlayerController = Cast<APlayerController>(Controller);
 	//コントローラー初期化
-	if (APlayerController* PlayerController = Cast<APlayerController>(Controller))//PlayerControllerを取得
+	if (PlayerController)//PlayerControllerを取得
 	{
 		if (ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer())//LocalPlayerを取得
 		{
@@ -43,7 +44,6 @@ void ARaiden::BeginPlay()
 		}
 	}
 }
-//離れた時ゼロにする
 void ARaiden::StopMoveInput(const FInputActionValue& Value)
 {
 	TargetRoll = 0.0f;
@@ -62,18 +62,7 @@ void ARaiden::Tick(float DeltaTime)
 		//デバッグ用のcapsuleを描画する
 		DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, FQuat::Identity, FColor::Green, false, -1.0f, 0, 2.0f);
 	}
-	//傾斜処理
-	if (BaseMesh)
-	{
-		
-		FRotator CurrentMeshRotation = BaseMesh->GetRelativeRotation();
-
-		//数値を滑らかに補正
-		float NewRoll = FMath::FInterpTo(CurrentMeshRotation.Roll, TargetRoll, DeltaTime, RollInterpSpeed);
-
-		// 機体の回転を更新（Roll のみ変更）
-		BaseMesh->SetRelativeRotation(FRotator(CurrentMeshRotation.Pitch, CurrentMeshRotation.Yaw, NewRoll));
-	}
+	
 	
 	
 }
@@ -90,11 +79,14 @@ void ARaiden::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EIC->BindAction(MoveAction, ETriggerEvent::Canceled, this, &ARaiden::StopMoveInput);
 
 		EIC->BindAction(FireAction, ETriggerEvent::Triggered, this, &ARaiden::FireInput);
+		EIC->BindAction(RestartAction, ETriggerEvent::Triggered, this, &ARaiden::OnRestartInput);
 	}
 }
 
 void ARaiden::MoveInput(const FInputActionValue& Value)
 {
+	if (!bCanAct || !IsAlive) return;
+
 	//入力システムから Vector2D の値を取得
 	FVector2D MovementVector = Value.Get<FVector2D>();
 	float DeltaTime = UGameplayStatics::GetWorldDeltaSeconds(GetWorld());
@@ -119,6 +111,8 @@ void ARaiden::MoveInput(const FInputActionValue& Value)
 
 void ARaiden::FireInput()
 {
+	if (!bCanAct || !IsAlive) return;
+
 	//現在のゲーム内の絶対時間を取得（秒）
 	float CurrentTime = GetWorld()->GetTimeSeconds();
 
@@ -132,4 +126,38 @@ void ARaiden::FireInput()
 	}
 }
 
+void ARaiden::HandleDestruction()
+{
+	Super::HandleDestruction();
 
+	IsAlive = false;
+	SetActorHiddenInGame(true);
+	SetActorTickEnabled(false);
+}
+
+void ARaiden::SetPlayerEnabled(bool Enabled)
+{
+	bCanAct = Enabled;
+
+	if (PlayerController)
+	{
+		if (Enabled)
+		{
+			EnableInput(PlayerController);
+		}
+		else
+		{
+			DisableInput(PlayerController);
+			TargetRoll = 0.0f;
+		}
+	}
+}
+
+void ARaiden::OnRestartInput(const FInputActionValue& Value)
+{
+	AShootingGameMode* GM = Cast<AShootingGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+	if (GM && GM->bGameEnded)
+	{
+		GM->RestartGame();
+	}
+}
