@@ -34,6 +34,14 @@ void ARaiden::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (SpringArmComp)
+	{
+		InitialCameraOffset = SpringArmComp->GetRelativeLocation();
+
+		// 设置为绝对位置（位置不跟随根组件，但旋转和缩放依然跟随）
+		SpringArmComp->SetAbsolute(true, false, false);
+	}
+
 	PlayerController = Cast<APlayerController>(Controller);
 	//コントローラー初期化
 	if (PlayerController)//PlayerControllerを取得
@@ -68,7 +76,18 @@ void ARaiden::Tick(float DeltaTime)
 		DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, FQuat::Identity, FColor::Green, false, -1.0f, 0, 2.0f);
 	}
 	
-	
+	FVector PlayerLoc = GetActorLocation();
+	PlayerLoc.Y = FMath::Clamp(PlayerLoc.Y, PlayerMinY, PlayerMaxY);
+	SetActorLocation(PlayerLoc);
+
+	if (SpringArmComp)
+	{
+		FVector CameraLoc = PlayerLoc; // 摄像机本来想跟着玩家走
+		CameraLoc.Y = FMath::Clamp(CameraLoc.Y, CameraMinY, CameraMaxY);
+
+		// 应用摄像机位置（加上原本在蓝图中调好的高度偏移）
+		SpringArmComp->SetWorldLocation(CameraLoc - InitialCameraOffset);
+	}
 	
 }
 
@@ -85,6 +104,8 @@ void ARaiden::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 		EIC->BindAction(FireAction, ETriggerEvent::Triggered, this, &ARaiden::FireInput);
 		EIC->BindAction(RestartAction, ETriggerEvent::Triggered, this, &ARaiden::OnRestartInput);
+
+		EIC->BindAction(QuitAction, ETriggerEvent::Triggered, this, &ARaiden::OnQuitInput);
 	}
 }
 
@@ -131,6 +152,7 @@ void ARaiden::FireInput()
 	}
 }
 
+
 void ARaiden::HandleDestruction()
 {
 	Super::HandleDestruction();
@@ -165,4 +187,9 @@ void ARaiden::OnRestartInput(const FInputActionValue& Value)
 	{
 		GM->RestartGame();
 	}
+}
+
+void ARaiden::OnQuitInput(const FInputActionValue& Value)
+{
+	UKismetSystemLibrary::QuitGame(this, PlayerController, EQuitPreference::Quit, true);
 }
