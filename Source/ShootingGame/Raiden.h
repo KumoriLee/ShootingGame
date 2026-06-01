@@ -46,6 +46,21 @@ protected:
 	// クールダウン計算用
 	float LastFireTime = 0.0f;
 
+	// 摄像机允许移动的左边界 (Y轴最小值)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Settings")
+	float CameraMinY = -1500.0f;
+
+	// 摄像机允许移动的右边界 (Y轴最大值)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Settings")
+	float CameraMaxY = 1500.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bounds Settings|Player")
+	float PlayerMinY = -1500.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bounds Settings|Player")
+	float PlayerMaxY = 1500.0f;
+
+	FVector InitialCameraOffset;
+
 public:
 	ARaiden();
 
@@ -73,6 +88,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* RestartAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* QuitAction;
 
 	//カメラコンポーネント
 	UPROPERTY(VisibleAnywhere)
@@ -106,6 +124,7 @@ public:
 	 */
 	void SetPlayerEnabled(bool Enabled);
 	void OnRestartInput(const FInputActionValue& Value);
+	void OnQuitInput(const FInputActionValue& Value);
 
 	UPROPERTY(VisibleAnywhere)
 	class UHealthComponent* HealthComp;
