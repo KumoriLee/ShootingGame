@@ -10,7 +10,7 @@ void AShootingGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// GameModeを使用してデフォルトプレイヤーを設定
+	// デフォルトプレイヤーを取得し Raiden にキャスト
 	APawn* PlayerPawn = UGameplayStatics::GetPlayerPawn(GetWorld(), 0);
 	if (PlayerPawn)
 	{
@@ -40,7 +40,7 @@ void AShootingGameMode::BeginPlay()
 		}
 	}
 
-	// 1秒ごとにカウントダウン表示を更新（3 → 2 → 1 → Go）
+	// カウントダウン開始（3 → 2 → 1 → Go）
 	CountdownStep = 3;
 	GetWorldTimerManager().SetTimer(CountdownTimerHandle, [this]()
 	{
@@ -74,26 +74,26 @@ void AShootingGameMode::BeginPlay()
 
 void AShootingGameMode::StartGame()
 {
-	// プレイヤーの操作を再有効化
+	// プレイヤー操作を再有効化
 	if (raiden)
 	{
 		raiden->SetPlayerEnabled(true);
 	}
 
-	// 敵の出現を開始
+	// 敵の定期スポーンを開始
 	GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &AShootingGameMode::SpawnEnemy, SpawnInterval, true);
 
-	// ゲーム制限時間を開始、満了時にEndGameを実行
+	// ゲーム制限時間タイマーを開始、満了時に EndGame を実行
 	GetWorldTimerManager().SetTimer(GameTimerHandle, this, &AShootingGameMode::EndGame, GameDuration, false);
 
-	// UIの初期表示
+	// UI の初期表示
 	if (ScreenMessageWidget)
 	{
 		ScreenMessageWidget->SetPointText(point);
 		ScreenMessageWidget->SetTimeText(FMath::CeilToInt(GameDuration));
 	}
 
-	// Time 表示を 0.2秒ごとに更新
+	// 残り時間表示を 0.2 秒ごとに更新
 	GetWorldTimerManager().SetTimer(UITimerHandle, [this]()
 	{
 		if (ScreenMessageWidget)
@@ -123,7 +123,7 @@ void AShootingGameMode::EndGame()
 		ScreenMessageWidget->SetMessageText(TEXT("Victory"));
 	}
 
-	// 1.5秒後に "Click to Restart" を表示（実際のリスタートは OnRestartInput で処理）
+	// 1.5 秒後に "Click to Restart" を表示（実際のリスタートは OnRestartInput で処理）
 	FTimerHandle PromptTimer;
 	GetWorldTimerManager().SetTimer(PromptTimer, [this]()
 	{
@@ -142,7 +142,7 @@ void AShootingGameMode::RestartGame()
 
 void AShootingGameMode::StopEnemy()
 {
-	// シーン内の全 EnemyRaidenPawn を取得
+	// シーン内の全 EnemyRaidenPawn を取得し Tick とタイマーを停止
 	TArray<AActor*> FoundEnemies;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEnemyRaidenPawn::StaticClass(), FoundEnemies);
 

@@ -5,12 +5,13 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 
-#include "Components/TextBlock.h"		// TextBlock 控件：显示静态文字
+#include "Components/TextBlock.h"		// TextBlock ウィジェット：静的テキストを表示
 
 #include "ScreenMessage.generated.h"
 
 /**
- * 
+ * 画面メッセージ UI ウィジェット
+ * カウントダウン / 勝敗メッセージ / スコア / 残り時間を表示する
  */
 UCLASS()
 class SHOOTINGGAME_API UScreenMessage : public UUserWidget
@@ -18,24 +19,34 @@ class SHOOTINGGAME_API UScreenMessage : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	/** 绑定到蓝图中的 MessageTextBlock 控件，用于显示倒计时/胜负文字 */
+	/** ブループリントの MessageTextBlock にバインドされるテキストブロック。カウントダウン / 勝敗メッセージを表示 */
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	UTextBlock* MessageTextBlock;
 
+	/** ブループリントの PointTextBlock にバインドされるテキストブロック。スコアを表示 */
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	UTextBlock* PointTextBlock;
 
+	/** ブループリントの TimeTextBlock にバインドされるテキストブロック。残り時間を表示 */
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	UTextBlock* TimeTextBlock;
 
 	/**
-	 * 设置屏幕显示文字
-	 * @param Message 要显示的字符串
+	 * 画面中央のメッセージテキストを設定する
+	 * @param Message 表示する文字列
 	 */
 	void SetMessageText(FString Message);
 
+	/**
+	 * スコア表示を更新する
+	 * @param Point 現在のスコア
+	 */
 	void SetPointText(int32 Point);
 
+	/**
+	 * 残り時間表示を更新する
+	 * @param Time 残り秒数
+	 */
 	void SetTimeText(int32 Time);
 
 	

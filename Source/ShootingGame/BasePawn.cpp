@@ -2,21 +2,21 @@
 
 
 #include "BasePawn.h"
-#include "Kismet/GameplayStatics.h"	// ゲーム静的ユーティリティ関数：PlaySoundAtLocation など
+#include "Kismet/GameplayStatics.h"	// ゲームプレイ静的ユーティリティ：PlaySoundAtLocation など
 
-// Sets default values
+// デフォルト値の設定
 ABasePawn::ABasePawn()
 {
- 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Tick() を毎フレーム呼び出すよう設定。不要な場合は無効にしてパフォーマンスを向上可能
 	PrimaryActorTick.bCanEverTick = true;
 
-	//コライダーをルートコンポーネントに設定します。これにより、後でモデルを自由に変更できるようになる
+	// コライダーをルートコンポーネントに設定。後でモデルを自由に差し替え可能にする
 	CapsuleComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CapsuleComp"));
 	SetRootComponent(CapsuleComp);
 
 	BaseMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BaseMesh"));
 	BaseMesh->SetupAttachment(CapsuleComp);
-	//生成点をbasemeshにつける
+	// 弾のスポーン位置を BaseMesh にアタッチ
 	ProjectileSpawnPoint = CreateDefaultSubobject<USceneComponent>(TEXT("ProjectileSpawnPoint"));
 	ProjectileSpawnPoint->SetupAttachment(BaseMesh);
 }

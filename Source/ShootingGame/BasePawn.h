@@ -9,7 +9,7 @@
 
 #include "Projectile.h"
 
-#include "NiagaraFunctionLibrary.h"		// Niagara パーティクルシステムユーティリティ（エフェクト生成）
+#include "NiagaraFunctionLibrary.h"		// Niagara パーティクルシステム：シーン上にエフェクトを生成
 
 #include "BasePawn.generated.h"
 
@@ -19,7 +19,7 @@ class SHOOTINGGAME_API ABasePawn : public APawn
 	GENERATED_BODY()
 
 public:
-	// Sets default values for this pawn's properties
+	// この Pawn のデフォルト値を設定
 	ABasePawn();
 
 	/**
@@ -28,38 +28,43 @@ public:
 	 */
 	virtual void Tick(float DeltaTime) override;
 
-	//コライダー
+	/** コリジョン用カプセルコンポーネント（ルート） */
 	UPROPERTY(VisibleAnywhere)
 	UCapsuleComponent* CapsuleComp;
 
+	/** 機体のベースメッシュ（カプセルにアタッチ） */
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* BaseMesh;
 
-	//弾の生成点
+	/** 弾のスポーン位置（BaseMesh にアタッチ） */
 	UPROPERTY(VisibleAnywhere)
 	USceneComponent* ProjectileSpawnPoint;
 
-
+	/** スポーンする弾のクラス */
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AProjectile> ProjectileClass;
 
 
-	//傾斜に関する変数
+	// 傾斜に関するパラメータ
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
 	bool bCanRoll = true;
 
+	/** 最大傾斜角度（度） */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float MaxRollAngle = 45.0f;//傾斜角度
+	float MaxRollAngle = 45.0f;
 
+	/** 傾斜の補間速度（大きいほど速く傾く） */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float RollInterpSpeed = 5.0f;//傾斜のスムース遷移速度
+	float RollInterpSpeed = 5.0f;
 
 protected:
-	//今の傾斜角度
+	/** 現在の目標傾斜角度 */
 	float TargetRoll = 0.0f;
 
+	/** 弾をスポーンして発射する */
 	void fire();
 
+	/** 死亡時の破壊処理（エフェクト・サウンド再生） */
 	void HandleDestruction();
 
 	/** 死亡時に再生する Niagara パーティクルシステム */

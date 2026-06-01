@@ -21,7 +21,8 @@ class UCameraComponent;
 
 
 /**
- * 
+ * プレイヤー機（雷電）
+ * EnhancedInput による移動・射撃・リスタート操作、SpringArm カメラ制御を担当
  */
 UCLASS()
 class SHOOTINGGAME_API ARaiden : public ABasePawn
@@ -37,28 +38,31 @@ protected:
 	 */
 	void StopMoveInput(const FInputActionValue& Value);
 
-	//連射するためにtimerを作る
+	// 連射制御用タイマー
 
-	// 連続発射の間隔（秒）
+	/** 連続発射の間隔（秒） */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	float FireRate = 0.15f;
 
-	// クールダウン計算用
+	/** 最終発射時刻（クールダウン計算用） */
 	float LastFireTime = 0.0f;
 
-	// 摄像机允许移动的左边界 (Y轴最小值)
+	// カメラの移動可能範囲：左端（Y 軸最小値）
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Settings")
 	float CameraMinY = -1500.0f;
 
-	// 摄像机允许移动的右边界 (Y轴最大值)
+	// カメラの移動可能範囲：右端（Y 軸最大値）
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera Settings")
 	float CameraMaxY = 1500.0f;
 
+	/** プレイヤー移動可能範囲：左端 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bounds Settings|Player")
 	float PlayerMinY = -1500.0f;
+	/** プレイヤー移動可能範囲：右端 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bounds Settings|Player")
 	float PlayerMaxY = 1500.0f;
 
+	/** 初期カメラオフセット（BeginPlay で記録） */
 	FVector InitialCameraOffset;
 
 public:
@@ -76,37 +80,43 @@ public:
 	 */
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	//入力対応
+	// 入力マッピングコンテキスト
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputMappingContext* DefaultMappingContext;
 
+	/** 移動入力アクション */
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* MoveAction;
 
+	/** 射撃入力アクション */
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* FireAction;
 
+	/** リスタート入力アクション */
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* RestartAction;
 
+	/** 終了入力アクション */
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* QuitAction;
 
-	//カメラコンポーネント
+	// カメラコンポーネント
 	UPROPERTY(VisibleAnywhere)
 	USpringArmComponent* SpringArmComp;
 
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* CameraComp;
 
-
-	//デフォルト値
+	/** 移動速度 */
 	UPROPERTY(EditAnywhere)
-	float Speed = 300.0f;//速度
+	float Speed = 300.0f;
 
+	/** プレイヤーコントローラーへのキャッシュポインタ */
 	APlayerController* PlayerController;
 
+	/** 生存フラグ */
 	bool IsAlive = true;
+	/** 操作受付フラグ（カウントダウン中・ゲーム終了後は false） */
 	bool bCanAct = true;
 
 
@@ -126,6 +136,7 @@ public:
 	void OnRestartInput(const FInputActionValue& Value);
 	void OnQuitInput(const FInputActionValue& Value);
 
+	/** 体力コンポーネント */
 	UPROPERTY(VisibleAnywhere)
 	class UHealthComponent* HealthComp;
 };

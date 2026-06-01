@@ -20,18 +20,16 @@ void AEnemyRaidenPawn::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//プレーヤーポインター
+	// プレイヤー機へのポインタをキャッシュ
 	Raiden = Cast<ARaiden>(UGameplayStatics::GetPlayerPawn(this, 0));
 
-	
-
-	//カプセルにhitイベントをつける
+	// カプセルコンポーネントに衝突イベントをバインド
 	if (CapsuleComp)
 	{
 		CapsuleComp->OnComponentHit.AddDynamic(this, &AEnemyRaidenPawn::OnEnemyHit);
 	}
 
-
+	// 射撃条件チェック用の反復タイマーを開始
 	GetWorldTimerManager().SetTimer(FireTimerHandle, this, &AEnemyRaidenPawn::CheckFireCondition, FireRate, true);
 
 }
@@ -41,17 +39,17 @@ void AEnemyRaidenPawn::Tick(float DeltaTime)
 
 	Super::Tick(DeltaTime);
 
-	//プレーヤーが死んでるか
+	// プレイヤーが死亡済みなら更新を停止
 	if (Raiden && !Raiden->IsAlive)
 	{
 		return;
 	}
 
 	FVector CurrentLocation = GetActorLocation();
-	//basic movement
+	// 基本前進移動
 	CurrentLocation.X += ForwardSpeed * DeltaTime;
 
-	// Y軸の追跡および傾きトリガーのロジック
+	// Y 軸の追跡および傾斜トリガーのロジック
 	if (Raiden)
 	{
 		float DistanceToPlayer = FVector::Dist(CurrentLocation, Raiden->GetActorLocation());
@@ -59,38 +57,38 @@ void AEnemyRaidenPawn::Tick(float DeltaTime)
 		{
 			float TargetY = Raiden->GetActorLocation().Y;
 
-			// Y軸の差を計算し、左右どちらに飛ぶかを判定する
+			// Y 軸の差を計算し、左右どちらに寄せるか判定
 			float DeltaY = TargetY - CurrentLocation.Y;
 
-			// スムーズな移動
+			// 目標 Y 座標へスムーズに移動
 			CurrentLocation.Y = FMath::FInterpConstantTo(CurrentLocation.Y, TargetY, DeltaTime, YTargetSpeed);
 
-			// 動的な傾き：目標のY軸との距離が10を超えた場合、傾きをトリガーする
+			// 動的傾斜：目標との Y 軸差が 10 を超えたら傾斜をトリガー
 			if (FMath::Abs(DeltaY) > 10.0f)
 			{
-				// 差の正負に応じて、左に傾くか右に傾くかを決定する
+				// 差の正負に応じて左右どちらに傾くか決定
 				TargetRoll = (DeltaY > 0) ? MaxRollAngle : -MaxRollAngle;
 			}
 			else
 			{
-				TargetRoll = 0.0f; // 追跡位置に到達、角度戻す
+				TargetRoll = 0.0f; // 追跡位置に到達、角度を戻す
 			}
 		}
 		else
 		{
-			TargetRoll = 0.0f; // 追跡範囲外のため、正面への飛行を維持する
+			TargetRoll = 0.0f; // 追跡範囲外のため正面飛行を維持
 		}
 	}
 	SetActorLocation(CurrentLocation);
 
-	// 発射サイクルのステートマシン
+	// 射撃サイクルのステートマシン
 	FireCycleTimer += DeltaTime;
-	if (bIsFiringPhase && FireCycleTimer >= 5.0f)//発射つつける時間
+	if (bIsFiringPhase && FireCycleTimer >= 5.0f) // 発射継続時間
 	{
 		bIsFiringPhase = false;
 		FireCycleTimer = 0.0f;
 	}
-	else if (!bIsFiringPhase && FireCycleTimer >= 2.0f)//クールダウン時間
+	else if (!bIsFiringPhase && FireCycleTimer >= 2.0f) // クールダウン時間
 	{
 		bIsFiringPhase = true;
 		FireCycleTimer = 0.0f;
@@ -99,9 +97,7 @@ void AEnemyRaidenPawn::Tick(float DeltaTime)
 
 void AEnemyRaidenPawn::CheckFireCondition()
 {
-	
-
-	// 範囲外判定は FrameComp に問い合わせる（旧 bIsOutOfBounds フラグを置き換え）
+	// 全条件を満たせば射撃実行（生存・射程内・発射フェーズ・画面内）
 	if (Raiden && Raiden->IsAlive && InFireRange() && bIsFiringPhase && !FrameComp->IsOutOfBounds())
 	{
 		fire();
@@ -112,8 +108,8 @@ bool AEnemyRaidenPawn::InFireRange()
 {
 	if (Raiden)
 	{
-		float DistanceToTank = FVector::Dist(GetActorLocation(), Raiden->GetActorLocation());
-		if (DistanceToTank <= FireRange)
+		float DistanceToPlayer = FVector::Dist(GetActorLocation(), Raiden->GetActorLocation());
+		if (DistanceToPlayer <= FireRange)
 		{
 			return true;
 		}
@@ -131,29 +127,29 @@ void AEnemyRaidenPawn::HandleDestruction()
 
 void AEnemyRaidenPawn::OnEnemyHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	//自身ではないの有効なコンフリクト
+	// 自身以外との有効な衝突のみ処理
 	if (OtherActor && OtherActor != this)
 	{
 		ARaiden* HitPlayer = Cast<ARaiden>(OtherActor);
-		//プレーヤーがどうか
+		// 衝突相手がプレイヤーかどうか確認
 		if (HitPlayer && HitPlayer->IsAlive)
 		{
 			UE_LOG(LogTemp, Display, TEXT("Crashed"));
 
-			//敵の最大生命を保存する用の変数
+			// 敵の最大HPを保持する変数
 			float EnemyMaxHP = 0.0f;
 
-			//自身のhealthcompを獲得、maxHealthを獲得
+			// 自身の HealthComp から最大HPを取得
 			UHealthComponent* EnemyHealthComp = FindComponentByClass<UHealthComponent>();
 			if (EnemyHealthComp)
 			{
 				EnemyMaxHP = EnemyHealthComp->maxHealth;
 			}
 
-			//プレーヤーにダメージを与える
+			// プレイヤーにダメージを与える
 			UGameplayStatics::ApplyDamage(HitPlayer, EnemyMaxHP, nullptr, this, UDamageType::StaticClass());
 
-			//自分にmaxhealthを引く--直接に普通の死亡処理する
+			// 自分にも最大HP分のダメージを与えて死亡処理を実行
 			UGameplayStatics::ApplyDamage(this, EnemyMaxHP, nullptr, this, UDamageType::StaticClass());
 		}
 	}

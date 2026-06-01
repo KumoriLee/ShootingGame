@@ -18,19 +18,21 @@ class SHOOTINGGAME_API AProjectile : public AActor
 	GENERATED_BODY()
 	
 public:
-	// Sets default values for this actor's properties
+	// このアクターのデフォルト値を設定
 	AProjectile();
 
 protected:
-	// Called when the game starts or when spawned
+	// ゲーム開始時またはスポーン時に呼ばれる
 	virtual void BeginPlay() override;
 
 public:
 	
 
+	/** 弾のメッシュコンポーネント（ルート） */
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* ProjectileMesh;
 
+	/** 弾の移動コンポーネント（速度・軌道制御） */
 	UPROPERTY(VisibleAnywhere)
 	UProjectileMovementComponent* ProjectileMovementComp;
 
@@ -51,6 +53,7 @@ public:
 	USoundBase* HitSound;
 
 
+	/** 命中時に与えるダメージ量 */
 	UPROPERTY(EditAnywhere)
 	float Damage = 25.0f;
 

@@ -14,24 +14,27 @@ class SHOOTINGGAME_API UHealthComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-public:	
-	// Sets default values for this component's properties
+public:
+	// このコンポーネントのデフォルト値を設定
 	UHealthComponent();
 
 protected:
-	// Called when the game starts
+	// ゲーム開始時に呼ばれる
 	virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
+public:
+	// 毎フレーム呼ばれる
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	/** 最大 HP */
 	UPROPERTY(EditAnywhere)
 	float maxHealth = 100.0f;
 
+	/** 現在の HP */
 	UPROPERTY(VisibleAnywhere)
 	float health;
 
+	/** GameMode へのキャッシュポインタ（ActorDied 通知用） */
 	AShootingGameMode* ShootingGameMode;
 
 	/**
