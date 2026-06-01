@@ -11,20 +11,24 @@
 #include "ShootingGameMode.generated.h"
 
 /**
- * 
+ * シューティングゲームのゲームモード
+ * カウントダウン → ゲーム進行 → 敵スポーン → 勝利/敗北 → リスタート のフローを管理
  */
 UCLASS()
 class SHOOTINGGAME_API AShootingGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
 protected:
-	// Called when the game starts or when spawned
+	// ゲーム開始時またはスポーン時に呼ばれる
 	virtual void BeginPlay() override;
 
 public:
+	/** プレイヤー機へのキャッシュポインタ */
 	ARaiden* raiden;
+	/** シーン内の敵機数 */
 	int32 enemyCount;
+	/** 現在のスコア */
 	int32 point = 0;
 
 	UPROPERTY(EditAnywhere, Category = "Spawning")

@@ -6,10 +6,10 @@
 #include "Kismet/GameplayStatics.h"
 
 
-// Sets default values
+// デフォルト値の設定
 AProjectile::AProjectile()
 {
-	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Tick() を毎フレーム呼び出すよう設定。弾は移動コンポーネント任せなので無効
 	PrimaryActorTick.bCanEverTick = false;
 
 	ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProjectileMesh"));
@@ -25,11 +25,11 @@ AProjectile::AProjectile()
 	FrameComp = CreateDefaultSubobject<UFrameComponent>(TEXT("FrameComp"));
 }
 
-// Called when the game starts or when spawned
+// ゲーム開始時またはスポーン時に呼ばれる
 void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
-	//デリゲート
+	// ヒットデリゲートをバインド
 	ProjectileMesh->OnComponentHit.AddDynamic(this, &AProjectile::OnHit);
 
 	// 発射音を再生
@@ -46,6 +46,7 @@ void AProjectile::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, U
 	AActor* MyOwner = GetOwner();
 	if (MyOwner)
 	{
+		// 自身・Owner 以外のアクターにのみダメージを与える（自傷防止）
 		if (OtherActor && (OtherActor != MyOwner) && (OtherActor != this))
 		{
 			UGameplayStatics::ApplyDamage(

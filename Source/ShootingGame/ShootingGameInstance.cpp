@@ -5,6 +5,7 @@
 
 void UShootingGameInstance::Changelevel(int32 Index)
 {
+	// LevelManagerSubsystem は0ベースインデックスを使用するため、1ベースから変換
 	if (ULevelManagerSubsystem* LM = GetSubsystem<ULevelManagerSubsystem>())
 	{
 		LM->OpenLevelByIndex(Index - 1);

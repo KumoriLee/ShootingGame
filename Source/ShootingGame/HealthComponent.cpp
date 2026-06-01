@@ -5,23 +5,19 @@
 #include "Kismet/GameplayStatics.h"
 
 
-// Sets default values for this component's properties
+// このコンポーネントのデフォルト値を設定
 UHealthComponent::UHealthComponent()
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
+	// Tick() を毎フレーム呼び出すよう設定。不要な場合は無効にしてパフォーマンスを向上可能
 	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
 }
 
 
-// Called when the game starts
+// ゲーム開始時に呼ばれる
 void UHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ...
 	health = maxHealth;
 
 	GetOwner()->OnTakeAnyDamage.AddDynamic(this, &UHealthComponent::OnDamageTaken);
@@ -34,12 +30,10 @@ void UHealthComponent::BeginPlay()
 }
 
 
-// Called every frame
+// 毎フレーム呼ばれる
 void UHealthComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
 }
 
 void UHealthComponent::OnDamageTaken(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
@@ -47,6 +41,7 @@ void UHealthComponent::OnDamageTaken(AActor* DamagedActor, float Damage, const U
 	if (Damage > 0.0f)
 	{
 		health -= Damage;
+		// HP が 0 以下になったら GameMode に死亡を通知
 		if (health <= 0.0f)
 		{
 			if (ShootingGameMode)

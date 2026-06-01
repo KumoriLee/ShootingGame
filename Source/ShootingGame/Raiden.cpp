@@ -38,20 +38,20 @@ void ARaiden::BeginPlay()
 	{
 		InitialCameraOffset = SpringArmComp->GetRelativeLocation();
 
-		// 设置为绝对位置（位置不跟随根组件，但旋转和缩放依然跟随）
+		// 絶対位置に設定（位置はルートコンポーネントに追従せず、回転とスケールは追従）
 		SpringArmComp->SetAbsolute(true, false, false);
 	}
 
 	PlayerController = Cast<APlayerController>(Controller);
-	//コントローラー初期化
-	if (PlayerController)//PlayerControllerを取得
+	// コントローラー初期化 & EnhancedInput サブシステムのセットアップ
+	if (PlayerController)
 	{
-		if (ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer())//LocalPlayerを取得
+		if (ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer())
 		{
 			if (UEnhancedInputLocalPlayerSubsystem* Subsystem =
 				ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer))
 			{
-				//このマッピングコンテキストで定義されたすべての入力アクションをエンジンが認識し、処理できるように
+				// このマッピングコンテキストで定義されたすべての入力アクションをエンジンに登録
 				Subsystem->AddMappingContext(DefaultMappingContext, 0);
 			}
 		}
@@ -65,14 +65,14 @@ void ARaiden::StopMoveInput(const FInputActionValue& Value)
 void ARaiden::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	//CapsuleComponent を取得し、そのカプセル状のデバッグ形状を描画する
-	if (CapsuleComp)//存在する場合
+	// デバッグ用：CapsuleComponent の形状を視覚化
+	if (CapsuleComp)
 	{
-		FVector CapsuleLocation = CapsuleComp->GetComponentLocation();//座標のベクトルを獲得
-		float	CapsuleRadius = CapsuleComp->GetScaledCapsuleRadius();//半径
-		float	CapsuleHalfHeight = CapsuleComp->GetScaledCapsuleHalfHeight();//直径
+		FVector CapsuleLocation = CapsuleComp->GetComponentLocation();
+		float CapsuleRadius = CapsuleComp->GetScaledCapsuleRadius();
+		float CapsuleHalfHeight = CapsuleComp->GetScaledCapsuleHalfHeight();
 
-		//デバッグ用のcapsuleを描画する
+		// 緑色のデバッグカプセルを描画
 		DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, FQuat::Identity, FColor::Green, false, -1.0f, 0, 2.0f);
 	}
 	
@@ -82,10 +82,10 @@ void ARaiden::Tick(float DeltaTime)
 
 	if (SpringArmComp)
 	{
-		FVector CameraLoc = PlayerLoc; // 摄像机本来想跟着玩家走
+		FVector CameraLoc = PlayerLoc; // カメラは本来プレイヤー位置に追従する
 		CameraLoc.Y = FMath::Clamp(CameraLoc.Y, CameraMinY, CameraMaxY);
 
-		// 应用摄像机位置（加上原本在蓝图中调好的高度偏移）
+		// カメラ位置を適用（ブループリントで設定済みの高さオフセットを加味）
 		SpringArmComp->SetWorldLocation(CameraLoc - InitialCameraOffset);
 	}
 	
@@ -113,7 +113,7 @@ void ARaiden::MoveInput(const FInputActionValue& Value)
 {
 	if (!bCanAct || !IsAlive) return;
 
-	//入力システムから Vector2D の値を取得
+	// EnhancedInput から Vector2D の値を取得
 	FVector2D MovementVector = Value.Get<FVector2D>();
 	float DeltaTime = UGameplayStatics::GetWorldDeltaSeconds(GetWorld());
 
@@ -130,7 +130,7 @@ void ARaiden::MoveInput(const FInputActionValue& Value)
 		// 第2引数を true にすることで、壁などの衝突判定を有効に
 		AddActorLocalOffset(DeltaLocation, true);
 
-		// 右入力(1.0)なら45度、左入力(-1.0)なら-45度に傾斜
+		// 右入力(1.0)なら MaxRollAngle 度、左入力(-1.0)なら -MaxRollAngle 度に傾斜
 		TargetRoll = MovementVector.X * MaxRollAngle;
 	}
 }
@@ -139,15 +139,15 @@ void ARaiden::FireInput()
 {
 	if (!bCanAct || !IsAlive) return;
 
-	//現在のゲーム内の絶対時間を取得（秒）
+	// 現在のゲーム内絶対時間を取得（秒）
 	float CurrentTime = GetWorld()->GetTimeSeconds();
 
-	//現在の時間 - 前回撃った時間 が FireRate以上経過しているか判定
+	// 前回発射から FireRate 秒以上経過していれば射撃実行
 	if (CurrentTime - LastFireTime >= FireRate)
 	{
 		fire();
 
-		//クールダウンをリセットする
+		// 最終発射時刻を更新（クールダウンリセット）
 		LastFireTime = CurrentTime;
 	}
 }

@@ -5,7 +5,7 @@
 
 void UScreenMessage::SetMessageText(FString Message)
 {
-	// 将 FString 转为 FText 后设置到绑定的 TextBlock 控件
+	// FString → FText に変換してバインド先の TextBlock に反映
 	FText MessageText = FText::FromString(Message);
 	MessageTextBlock->SetText(MessageText);
 }
