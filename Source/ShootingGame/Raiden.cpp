@@ -12,6 +12,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "ShootingGameMode.h"
 #include "HealthComponent.h"
+#include "Background.h"
 
 
 
@@ -32,7 +33,11 @@ ARaiden::ARaiden()
 
 void ARaiden::BeginPlay()
 {
+
 	Super::BeginPlay();
+
+	// シーンから背景アクターを検索して参照を保持
+	MapBackground = Cast<ABackground>(UGameplayStatics::GetActorOfClass(GetWorld(), ABackground::StaticClass()));
 
 	if (SpringArmComp)
 	{
@@ -65,6 +70,8 @@ void ARaiden::StopMoveInput(const FInputActionValue& Value)
 void ARaiden::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	//shippingバージョンのとき消す
+#if ENABLE_DRAW_DEBUG
 	// デバッグ用：CapsuleComponent の形状を視覚化
 	if (CapsuleComp)
 	{
@@ -75,6 +82,7 @@ void ARaiden::Tick(float DeltaTime)
 		// 緑色のデバッグカプセルを描画
 		DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, FQuat::Identity, FColor::Green, false, -1.0f, 0, 2.0f);
 	}
+#endif
 	
 	FVector PlayerLoc = GetActorLocation();
 	PlayerLoc.Y = FMath::Clamp(PlayerLoc.Y, PlayerMinY, PlayerMaxY);
@@ -88,7 +96,14 @@ void ARaiden::Tick(float DeltaTime)
 		// カメラ位置を適用（ブループリントで設定済みの高さオフセットを加味）
 		SpringArmComp->SetWorldLocation(CameraLoc - InitialCameraOffset);
 	}
-	
+
+	// 背景メッシュのX位置をプレイヤーに追従（Y/Zは据え置き）
+	if (MapBackground)
+	{
+		FVector BgLoc = MapBackground->GetActorLocation();
+		MapBackground->SetActorLocation(FVector(PlayerLoc.X, BgLoc.Y, BgLoc.Z));
+	}
+
 }
 
 void ARaiden::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
