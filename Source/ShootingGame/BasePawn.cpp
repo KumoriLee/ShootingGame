@@ -2,13 +2,13 @@
 
 
 #include "BasePawn.h"
+#include "TiltComponent.h"
 #include "Kismet/GameplayStatics.h"	// ゲームプレイ静的ユーティリティ：PlaySoundAtLocation など
 
 // デフォルト値の設定
 ABasePawn::ABasePawn()
 {
-	// Tick() を毎フレーム呼び出すよう設定。不要な場合は無効にしてパフォーマンスを向上可能
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	// コライダーをルートコンポーネントに設定。後でモデルを自由に差し替え可能にする
 	CapsuleComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CapsuleComp"));
@@ -19,25 +19,10 @@ ABasePawn::ABasePawn()
 	// 弾のスポーン位置を BaseMesh にアタッチ
 	ProjectileSpawnPoint = CreateDefaultSubobject<USceneComponent>(TEXT("ProjectileSpawnPoint"));
 	ProjectileSpawnPoint->SetupAttachment(BaseMesh);
-}
 
-void ABasePawn::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-	// 傾斜処理
-	if (BaseMesh)
-	{
-		// 傾斜が無効な場合は TargetRoll を0に強制 — 異常状態で傾きっぱなしになるのを防止
-		float RealTargetRoll = bCanRoll ? TargetRoll : 0.0f;
-
-		FRotator CurrentMeshRotation = BaseMesh->GetRelativeRotation();
-
-		// 現在の角度から目標角度へ滑らかに補間
-		float NewRoll = FMath::FInterpTo(CurrentMeshRotation.Roll, RealTargetRoll, DeltaTime, RollInterpSpeed);
-
-		// メッシュの回転を更新（Roll のみ変更）
-		BaseMesh->SetRelativeRotation(FRotator(CurrentMeshRotation.Pitch, CurrentMeshRotation.Yaw, NewRoll));
-	}
+	// 傾斜コンポーネントを作成し、傾斜対象メッシュを設定
+	TiltComp = CreateDefaultSubobject<UTiltComponent>(TEXT("TiltComp"));
+	TiltComp->SetTargetMesh(BaseMesh);
 }
 
 void ABasePawn::fire()

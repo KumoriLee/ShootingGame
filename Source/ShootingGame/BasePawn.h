@@ -22,12 +22,6 @@ public:
 	// この Pawn のデフォルト値を設定
 	ABasePawn();
 
-	/**
-	 * 機体傾斜の更新処理
-	 * @param DeltaTime フレームのデルタ時間（秒）
-	 */
-	virtual void Tick(float DeltaTime) override;
-
 	/** コリジョン用カプセルコンポーネント（ルート） */
 	UPROPERTY(VisibleAnywhere)
 	UCapsuleComponent* CapsuleComp;
@@ -44,23 +38,11 @@ public:
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AProjectile> ProjectileClass;
 
-
-	// 傾斜に関するパラメータ
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	bool bCanRoll = true;
-
-	/** 最大傾斜角度（度） */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float MaxRollAngle = 45.0f;
-
-	/** 傾斜の補間速度（大きいほど速く傾く） */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
-	float RollInterpSpeed = 5.0f;
+	/** 機体傾斜コンポーネント */
+	UPROPERTY(VisibleAnywhere)
+	class UTiltComponent* TiltComp;
 
 protected:
-	/** 現在の目標傾斜角度 */
-	float TargetRoll = 0.0f;
-
 	/** 弾をスポーンして発射する */
 	void fire();
 
