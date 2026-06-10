@@ -21,7 +21,7 @@ ABackground::ABackground()
 	BackgroundMesh->bReceivesDecals = false;
 
 	// 内部変数の初期化
-	CurrentSpeed = InitialScrollSpeed;
+	CurrentSpeed = FLT_MAX;  // 哨兵値：BeginPlayのSetScrollSpeedが必ず実行されるようにする
 	BaseOffset = 0.0f;
 	LastSpeedChangeTime = 0.0f;
 }
@@ -54,11 +54,11 @@ void ABackground::SetScrollSpeed(float NewSpeed)
 	// 現在のワールド絶対時間を取得（ゲーム一時停止に対応した時間システム）
 	float CurrentGameTime = GetWorld()->GetTimeSeconds();
 
-	// 1. 前回の速度変更から現在までに蓄積された UV オフセットを清算
+	// 前回の速度変更から現在までに蓄積された UV オフセットを清算
 	BaseOffset += (CurrentGameTime - LastSpeedChangeTime) * CurrentSpeed;
 
 	// 【ジッター防止】小数部のみを保持する。
-	// テクスチャは Wrap（循環）のため、オフセット 100.2 と 0.2 は見た目が完全に一致する。
+	// テクスチャは Wrapのため、オフセット 100.2 と 0.2 は見た目が完全に一致する。
 	// しかし長時間プレイで値が大きくなると、浮動小数点精度の低下により画面が激しく震える。
 	BaseOffset = FMath::Fmod(BaseOffset, 1.0f);
 	if (BaseOffset < 0.0f)
@@ -66,11 +66,11 @@ void ABackground::SetScrollSpeed(float NewSpeed)
 		BaseOffset += 1.0f; // 値を常に 0.0 〜 1.0 の範囲に正規化
 	}
 
-	// 2. 状態更新：新しい速度と速度変更時刻を保存
+	// 状態更新：新しい速度と速度変更時刻を保存
 	CurrentSpeed = NewSpeed;
 	LastSpeedChangeTime = CurrentGameTime;
 
-	// 3. 計算したベースオフセット・開始時刻・速度をマテリアルに送信（以降のスクロール計算は GPU が担当）
+	// 計算したベースオフセット・開始時刻・速度をマテリアルに送信（以降のスクロール計算は GPU が担当）
 	DynamicMat->SetScalarParameterValue(FName("BaseOffset"), BaseOffset);
 	DynamicMat->SetScalarParameterValue(FName("StartTime"), LastSpeedChangeTime);
 	DynamicMat->SetScalarParameterValue(FName("Speed"), CurrentSpeed);

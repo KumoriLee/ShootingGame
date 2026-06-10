@@ -18,6 +18,8 @@
 class UInputMappingContext;
 //カメラ対応
 class UCameraComponent;
+//マップ対応
+class ABackground;
 
 
 /**
@@ -64,6 +66,9 @@ protected:
 
 	/** 初期カメラオフセット（BeginPlay で記録） */
 	FVector InitialCameraOffset;
+
+	UPROPERTY(VisibleAnywhere)
+	ABackground* MapBackground;
 
 public:
 	ARaiden();
