@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Raiden.h"
@@ -13,6 +13,7 @@
 #include "ShootingGameMode.h"
 #include "HealthComponent.h"
 #include "Background.h"
+#include "TiltComponent.h"
 
 
 
@@ -28,6 +29,7 @@ ARaiden::ARaiden()
 
 	HealthComp = CreateDefaultSubobject<UHealthComponent>(TEXT("HtalthComp"));
 
+	PrimaryActorTick.bCanEverTick = true;
 
 }
 
@@ -64,7 +66,10 @@ void ARaiden::BeginPlay()
 }
 void ARaiden::StopMoveInput(const FInputActionValue& Value)
 {
-	TargetRoll = 0.0f;
+	if (TiltComp)
+	{
+		TiltComp->ResetRoll();
+	}
 }
 
 void ARaiden::Tick(float DeltaTime)
@@ -83,7 +88,7 @@ void ARaiden::Tick(float DeltaTime)
 		DrawDebugCapsule(GetWorld(), CapsuleLocation, CapsuleHalfHeight, CapsuleRadius, FQuat::Identity, FColor::Green, false, -1.0f, 0, 2.0f);
 	}
 #endif
-	
+
 	FVector PlayerLoc = GetActorLocation();
 	PlayerLoc.Y = FMath::Clamp(PlayerLoc.Y, PlayerMinY, PlayerMaxY);
 	SetActorLocation(PlayerLoc);
@@ -146,7 +151,10 @@ void ARaiden::MoveInput(const FInputActionValue& Value)
 		AddActorLocalOffset(DeltaLocation, true);
 
 		// 右入力(1.0)なら MaxRollAngle 度、左入力(-1.0)なら -MaxRollAngle 度に傾斜
-		TargetRoll = MovementVector.X * MaxRollAngle;
+		if (TiltComp)
+		{
+			TiltComp->SetTargetRoll(MovementVector.X * TiltComp->MaxRollAngle);
+		}
 	}
 }
 
@@ -190,7 +198,10 @@ void ARaiden::SetPlayerEnabled(bool Enabled)
 		else
 		{
 			DisableInput(PlayerController);
-			TargetRoll = 0.0f;
+			if (TiltComp)
+			{
+				TiltComp->ResetRoll();
+			}
 		}
 	}
 }

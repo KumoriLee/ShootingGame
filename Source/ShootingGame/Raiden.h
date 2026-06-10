@@ -135,7 +135,7 @@ public:
 	void HandleDestruction();
 	/**
 	 * プレイヤーの入力受付を有効/無効に切り替える
-	 * @param Enabled true で入力を有効化、false で無効化（TargetRoll もリセット）
+	 * @param Enabled true で入力を有効化、false で無効化（傾斜もリセット）
 	 */
 	void SetPlayerEnabled(bool Enabled);
 	void OnRestartInput(const FInputActionValue& Value);

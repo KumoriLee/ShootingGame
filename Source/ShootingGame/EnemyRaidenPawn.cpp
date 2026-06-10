@@ -1,10 +1,11 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "EnemyRaidenPawn.h"
 #include "FrameComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "HealthComponent.h"
+#include "TiltComponent.h"
 
 
 AEnemyRaidenPawn::AEnemyRaidenPawn()
@@ -13,6 +14,8 @@ AEnemyRaidenPawn::AEnemyRaidenPawn()
 	FrameComp = CreateDefaultSubobject<UFrameComponent>(TEXT("FrameComp"));
 
 	HealthComp = CreateDefaultSubobject<UHealthComponent>(TEXT("HtalthComp"));
+
+	PrimaryActorTick.bCanEverTick = true;
 
 }
 
@@ -67,16 +70,25 @@ void AEnemyRaidenPawn::Tick(float DeltaTime)
 			if (FMath::Abs(DeltaY) > 10.0f)
 			{
 				// 差の正負に応じて左右どちらに傾くか決定
-				TargetRoll = (DeltaY > 0) ? MaxRollAngle : -MaxRollAngle;
+				if (TiltComp)
+				{
+					TiltComp->SetTargetRoll((DeltaY > 0) ? TiltComp->MaxRollAngle : -TiltComp->MaxRollAngle);
+				}
 			}
 			else
 			{
-				TargetRoll = 0.0f; // 追跡位置に到達、角度を戻す
+				if (TiltComp)
+				{
+					TiltComp->ResetRoll(); // 追跡位置に到達、角度を戻す
+				}
 			}
 		}
 		else
 		{
-			TargetRoll = 0.0f; // 追跡範囲外のため正面飛行を維持
+			if (TiltComp)
+			{
+				TiltComp->ResetRoll(); // 追跡範囲外のため正面飛行を維持
+			}
 		}
 	}
 	SetActorLocation(CurrentLocation);
