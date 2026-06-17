@@ -13,6 +13,7 @@ ABasePawn::ABasePawn()
 	// コライダーをルートコンポーネントに設定。後でモデルを自由に差し替え可能にする
 	CapsuleComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CapsuleComp"));
 	SetRootComponent(CapsuleComp);
+	//CapsuleComp->SetNotifyRigidBodyCollision(true); // 衝突イベントを確実に受け取る
 
 	BaseMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BaseMesh"));
 	BaseMesh->SetupAttachment(CapsuleComp);

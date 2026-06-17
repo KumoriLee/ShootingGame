@@ -27,9 +27,16 @@ void ARocks::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	FVector CurrentLocation = GetActorLocation();
+
+	FRotator CurrentRotation = GetActorRotation();
+
 	// 前方へ移動
 	CurrentLocation.X += ForwardSpeed * DeltaTime;
 	SetActorLocation(CurrentLocation);
+
+	CurrentRotation.Roll += RotateSpeed * DeltaTime;
+
+	SetActorRotation(CurrentRotation);
 }
 
 void ARocks::HandleDestruction()
