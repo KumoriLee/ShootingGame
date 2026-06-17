@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "ShootingGameMode.h"
@@ -81,8 +81,8 @@ void AShootingGameMode::StartGame()
 		raiden->SetPlayerEnabled(true);
 	}
 
-	// 敵の定期スポーンを開始
-	GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &AShootingGameMode::SpawnEnemy, SpawnInterval, true);
+	// 統一生成タイマーを開始（0.5秒周期で全 SpawnEntries を巡回）
+	GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &AShootingGameMode::SpawnTick, 0.5f, true);
 
 	// ゲーム制限時間タイマーを開始、満了時に EndGame を実行
 	GetWorldTimerManager().SetTimer(GameTimerHandle, this, &AShootingGameMode::EndGame, GameDuration, false);
@@ -143,16 +143,16 @@ void AShootingGameMode::RestartGame()
 
 void AShootingGameMode::StopEnemy()
 {
-	// シーン内の全 EnemyRaidenPawn を取得し Tick とタイマーを停止
-	TArray<AActor*> FoundEnemies;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AEnemyRaidenPawn::StaticClass(), FoundEnemies);
+	// シーン内の全 BasePawn 派生アクターを取得し Tick とタイマーを停止
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABasePawn::StaticClass(), FoundActors);
 
-	for (AActor* Enemy : FoundEnemies)
+	for (AActor* Actor : FoundActors)
 	{
-		if (Enemy)
+		if (Actor && Actor != raiden) // プレイヤーは停止しない
 		{
-			Enemy->SetActorTickEnabled(false);
-			GetWorldTimerManager().ClearAllTimersForObject(Enemy);
+			Actor->SetActorTickEnabled(false);
+			GetWorldTimerManager().ClearAllTimersForObject(Actor);
 		}
 	}
 }
@@ -215,19 +215,45 @@ void AShootingGameMode::ActorDied(AActor* DeadActor)
 	}
 }
 
-void AShootingGameMode::SpawnEnemy()
+void AShootingGameMode::SpawnTick()
 {
-	// プレイヤー死亡直後に敵が生成されるのを防ぐための生存チェック
-	if (EnemyClassToSpawn && raiden && raiden->IsAlive)
+	// プレイヤー死亡時は生成停止
+	if (!raiden || !raiden->IsAlive)
 	{
-		FVector PlayerLoc = raiden->GetActorLocation();
-
-		FVector SpawnLocation(PlayerLoc.X - 4000.0f, PlayerLoc.Y + FMath::RandRange(-2000.0f, 2000.0f), PlayerLoc.Z);
-
-		FRotator SpawnRotation(0.0f, 0.0f, 0.0f);
-
-		GetWorld()->SpawnActor<AEnemyRaidenPawn>(EnemyClassToSpawn, SpawnLocation, SpawnRotation);
+		return;
 	}
+
+	const float DeltaTime = 0.5f; // タイマー周期
+
+	for (FSpawnEntry& Entry : SpawnEntries)
+	{
+		if (!Entry.bEnabled || !Entry.ActorClass)
+		{
+			continue;
+		}
+
+		Entry.ElapsedSinceLastSpawn += DeltaTime;
+		if (Entry.ElapsedSinceLastSpawn >= Entry.SpawnInterval)
+		{
+			Entry.ElapsedSinceLastSpawn = 0.0f;
+			DoSpawn(Entry);
+		}
+	}
+}
+
+void AShootingGameMode::DoSpawn(const FSpawnEntry& Entry)
+{
+	FVector PlayerLoc = raiden->GetActorLocation();
+
+	FVector SpawnLocation(
+		PlayerLoc.X + Entry.SpawnOffset.X,
+		PlayerLoc.Y + Entry.SpawnOffset.Y + FMath::RandRange(-Entry.SpawnRangeY, Entry.SpawnRangeY),
+		PlayerLoc.Z + Entry.SpawnOffset.Z
+	);
+
+	FRotator SpawnRotation(0.0f, 0.0f, 0.0f);
+
+	GetWorld()->SpawnActor<ABasePawn>(Entry.ActorClass, SpawnLocation, SpawnRotation);
 }
 
 float AShootingGameMode::GetStartDelayRemaining() const

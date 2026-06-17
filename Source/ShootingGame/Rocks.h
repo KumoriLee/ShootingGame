@@ -26,6 +26,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float ForwardSpeed = 300.0f;
 
+	UPROPERTY(EditAnywhere, Category = "Movement")
+	float RotateSpeed = 25.0f;
+
 
 	/** 死亡時の破壊処理（エフェクト再生＋Destroy） */
 	void HandleDestruction();
