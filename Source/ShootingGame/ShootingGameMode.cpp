@@ -2,6 +2,7 @@
 
 
 #include "ShootingGameMode.h"
+#include "Rocks.h"
 #include "Kismet/GameplayStatics.h"
 #include "TimerManager.h"
 
@@ -200,6 +201,15 @@ void AShootingGameMode::ActorDied(AActor* DeadActor)
 			if (ScreenMessageWidget)
 			{
 				ScreenMessageWidget->SetPointText(point);
+			}
+		}
+		else
+		{
+			// 障害物（Rock）の破壊
+			ARocks* DeadRock = Cast<ARocks>(DeadActor);
+			if (DeadRock)
+			{
+				DeadRock->HandleDestruction();
 			}
 		}
 	}
