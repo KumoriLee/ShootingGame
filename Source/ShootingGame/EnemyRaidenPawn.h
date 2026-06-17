@@ -10,7 +10,7 @@
 
 /**
  * 敵機（雷電タイプ）
- * AI によるプレイヤー追跡、射撃サイクル FSM、衝突ダメージ処理を担当
+ * AI によるプレイヤー追跡、射撃サイクル FSM を担当（衝突ダメージは EnemyHitComponent に委譲）
  */
 UCLASS()
 class SHOOTINGGAME_API AEnemyRaidenPawn : public ABasePawn
@@ -61,23 +61,16 @@ public:
 	void HandleDestruction();
 
 
-	/**
-	 * 敵機同士または敵機とプレイヤーの衝突処理
-	 * @param HitComponent 衝突した自身のコンポーネント
-	 * @param OtherActor  衝突相手のアクター
-	 * @param OtherComp   衝突相手のコンポーネント
-	 * @param NormalImpulse 衝突の法線インパルス
-	 * @param Hit         衝突詳細情報
-	 */
-	UFUNCTION()
-	void OnEnemyHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
-
 	/** 画面範囲外判定コンポーネント。bAutoDestroy=false で委任により自爆処理を制御 */
 	UPROPERTY(VisibleAnywhere)
 	class UFrameComponent* FrameComp;
 
 	UPROPERTY(VisibleAnywhere)
 	class UHealthComponent* HealthComp;
+
+	/** 敵機衝突ダメージ処理コンポーネント */
+	UPROPERTY(VisibleAnywhere)
+	class UEnemyHitComponent* EnemyHitComp;
 
 
 

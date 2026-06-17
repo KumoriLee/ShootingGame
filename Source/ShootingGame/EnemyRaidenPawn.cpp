@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "EnemyRaidenPawn.h"
@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "HealthComponent.h"
 #include "TiltComponent.h"
+#include "EnemyHitComponent.h"
 
 
 AEnemyRaidenPawn::AEnemyRaidenPawn()
@@ -14,6 +15,8 @@ AEnemyRaidenPawn::AEnemyRaidenPawn()
 	FrameComp = CreateDefaultSubobject<UFrameComponent>(TEXT("FrameComp"));
 
 	HealthComp = CreateDefaultSubobject<UHealthComponent>(TEXT("HtalthComp"));
+
+	EnemyHitComp = CreateDefaultSubobject<UEnemyHitComponent>(TEXT("EnemyHitComp"));
 
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -25,12 +28,6 @@ void AEnemyRaidenPawn::BeginPlay()
 
 	// プレイヤー機へのポインタをキャッシュ
 	Raiden = Cast<ARaiden>(UGameplayStatics::GetPlayerPawn(this, 0));
-
-	// カプセルコンポーネントに衝突イベントをバインド
-	if (CapsuleComp)
-	{
-		CapsuleComp->OnComponentHit.AddDynamic(this, &AEnemyRaidenPawn::OnEnemyHit);
-	}
 
 	// 射撃条件チェック用の反復タイマーを開始
 	GetWorldTimerManager().SetTimer(FireTimerHandle, this, &AEnemyRaidenPawn::CheckFireCondition, FireRate, true);
@@ -136,33 +133,3 @@ void AEnemyRaidenPawn::HandleDestruction()
 	Destroy();
 }
 
-
-void AEnemyRaidenPawn::OnEnemyHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
-{
-	// 自身以外との有効な衝突のみ処理
-	if (OtherActor && OtherActor != this)
-	{
-		ARaiden* HitPlayer = Cast<ARaiden>(OtherActor);
-		// 衝突相手がプレイヤーかどうか確認
-		if (HitPlayer && HitPlayer->IsAlive)
-		{
-			UE_LOG(LogTemp, Display, TEXT("Crashed"));
-
-			// 敵の最大HPを保持する変数
-			float EnemyMaxHP = 0.0f;
-
-			// 自身の HealthComp から最大HPを取得
-			UHealthComponent* EnemyHealthComp = FindComponentByClass<UHealthComponent>();
-			if (EnemyHealthComp)
-			{
-				EnemyMaxHP = EnemyHealthComp->maxHealth;
-			}
-
-			// プレイヤーにダメージを与える
-			UGameplayStatics::ApplyDamage(HitPlayer, EnemyMaxHP, nullptr, this, UDamageType::StaticClass());
-
-			// 自分にも最大HP分のダメージを与えて死亡処理を実行
-			UGameplayStatics::ApplyDamage(this, EnemyMaxHP, nullptr, this, UDamageType::StaticClass());
-		}
-	}
-}
