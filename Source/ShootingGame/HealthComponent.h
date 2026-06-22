@@ -23,8 +23,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	// 毎フレーム呼ばれる
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	
 
 	/** 最大 HP */
 	UPROPERTY(EditAnywhere)
